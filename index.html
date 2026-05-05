@@ -3,256 +3,329 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBA Logistic Pricing Calculator</title>
+    <title>CBA Logistic Pricing Calculator - Pos Indonesia (Persero)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
             --delft-blue: #1C2D5A;
             --cinnabar: #EF4123;
-            --background: #F4F7FA;
+            --background: #F8FAFC;
         }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--background); color: var(--delft-blue); }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--background); 
+            color: var(--delft-blue);
+            margin: 0; padding: 20px;
+        }
         h1, h2, h3 { font-family: 'Sora', sans-serif; }
         
+        .container-box {
+            width: 100%; max-width: 800px;
+            background: white; border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden; border: 1px solid #e2e8f0;
+            margin: 0 auto;
+        }
+
+        .header-brand {
+            background-color: var(--delft-blue);
+            padding: 25px; display: flex;
+            justify-content: space-between; align-items: center;
+            border-bottom: 6px solid var(--cinnabar);
+        }
+
+        .header-brand img { height: 40px; object-fit: contain; }
+
         .input-rupiah { position: relative; }
         .input-rupiah::before {
-            content: "Rp";
-            position: absolute; left: 12px; top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8; font-weight: 700;
+            content: "Rp"; position: absolute; left: 16px; top: 50%;
+            transform: translateY(-50%); color: #94a3b8; font-weight: 800;
         }
         .input-rupiah input { 
-            padding-left: 42px; width: 100%; border: 2px solid #E2E8F0; 
-            border-radius: 12px; padding-top: 10px; padding-bottom: 10px; outline: none;
+            padding-left: 48px; width: 100%; border: 2px solid #E2E8F0; 
+            border-radius: 12px; padding-top: 12px; padding-bottom: 12px; outline: none;
+            font-weight: 600; font-size: 1rem;
         }
-        .input-rupiah input:focus { border-color: var(--delft-blue); }
+        .input-rupiah input:focus { border-color: var(--delft-blue); box-shadow: 0 0 0 4px rgba(28,45,90,0.1); }
 
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-btn {
+            flex: 1; padding: 15px; font-weight: 800; font-size: 12px;
+            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+            cursor: pointer; border: none; outline: none;
+        }
+        .tab-btn.active { background: white; color: var(--delft-blue); }
+        .tab-btn.inactive { color: #94a3b8; background: #f1f5f9; }
 
-        input[type="radio"]:checked + div {
+        .mode-section { display: none; padding: 30px; }
+        .mode-section.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .submit-button {
+            background-color: var(--delft-blue); color: white;
+            width: 100%; padding: 16px; border-radius: 12px;
+            font-weight: 800; text-transform: uppercase; margin-top: 20px;
+            transition: 0.2s; cursor: pointer; border: none;
+        }
+        .submit-button:hover { background-color: #142142; transform: translateY(-2px); }
+
+        .result-card {
+            border-radius: 20px; padding: 30px; margin-top: 30px;
+            text-align: center; color: white;
+        }
+        .bg-forward { background-color: var(--delft-blue); }
+        .bg-reverse { background-color: var(--cinnabar); }
+
+        .toggle-choice input { display: none; }
+        .toggle-choice label {
+            flex: 1; text-align: center; padding: 10px; cursor: pointer;
+            border: 2px solid #e2e8f0; font-size: 11px; font-weight: 800;
+            border-radius: 10px; transition: 0.2s; background: white;
+        }
+        .toggle-choice input:checked + label {
             background-color: var(--delft-blue); color: white; border-color: var(--delft-blue);
         }
     </style>
 </head>
-<body class="min-h-screen py-10 px-4">
+<body>
 
-    <nav class="max-w-2xl mx-auto flex justify-between items-center mb-6 bg-white p-4 rounded-2xl shadow-sm">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Danantara_Indonesia_%28no_SW%29.svg/960px-Danantara_Indonesia_%28no_SW%29.svg.png" alt="Danantara" class="h-8 object-contain">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/POSIND_2023_%28with_wordmark%29.svg/1280px-POSIND_2023_%28with_wordmark%29.svg.png" alt="Pos Indonesia" class="h-10 object-contain">
-    </nav>
+<div class="container-box">
+    <div class="header-brand">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Danantara_Indonesia_%28no_SW%29.svg/960px-Danantara_Indonesia_%28no_SW%29.svg.png" alt="Danantara">
+        <div class="text-center px-2">
+            <h1 class="text-white text-base md:text-xl font-extrabold uppercase">CBA LOGISTIC PRICING CALCULATOR</h1>
+            <p class="text-blue-300 text-[9px] font-bold tracking-widest uppercase italic">Corporate Sales Team</p>
+        </div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/POSIND_2023_%28with_wordmark%29.svg/1280px-POSIND_2023_%28with_wordmark%29.svg.png" alt="Pos Indonesia">
+    </div>
 
-    <div class="max-w-2xl mx-auto bg-white rounded-[32px] shadow-2xl overflow-hidden border border-gray-100">
-        <div class="bg-[#1C2D5A] p-8 text-center border-b-4 border-[#EF4123]">
-            <h1 class="text-white text-xl md:text-2xl font-extrabold uppercase">CBA LOGISTIC PRICING CALCULATOR</h1>
-            <p class="text-blue-300 text-[10px] font-bold tracking-widest mt-1 uppercase italic">KCU Batam Corporate Sales Team</p>
+    <div class="flex">
+        <button id="tab1" onclick="changeTab('maju')" class="tab-btn active">Opsi 1: Hitung Penawaran</button>
+        <button id="tab2" onclick="changeTab('mundur')" class="tab-btn inactive">Opsi 2: Reverse Budget</button>
+    </div>
+
+    <div id="sectionMaju" class="mode-section active">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="toggle-choice">
+                <span class="block text-[10px] font-black text-gray-400 uppercase mb-2">Wilayah Proyek</span>
+                <div class="flex gap-2">
+                    <input type="radio" name="areaM" id="areaFTZM" value="ftz" checked>
+                    <label for="areaFTZM">Batam (FTZ)</label>
+                    <input type="radio" name="areaM" id="areaLuarM" value="nonftz">
+                    <label for="areaLuarM">Luar Batam (Non-FTZ)</label>
+                </div>
+            </div>
+            <div class="toggle-choice">
+                <span class="block text-[10px] font-black text-gray-400 uppercase mb-2">Target Margin Laba</span>
+                <div class="flex gap-2">
+                    <input type="radio" name="marginM" id="m10M" value="0.10">
+                    <label for="m10M">10%</label>
+                    <input type="radio" name="marginM" id="m15M" value="0.15" checked>
+                    <label for="m15M">15%</label>
+                </div>
+            </div>
         </div>
 
-        <div class="p-6 md:p-10">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                <div>
-                    <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Wilayah Proyek</label>
-                    <div class="flex gap-2">
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" name="area" value="ftz" checked class="hidden" onchange="updateAll()">
-                            <div class="border-2 border-gray-100 rounded-xl py-2 text-center text-xs font-bold transition-all">KCU BATAM (FTZ)</div>
-                        </label>
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" name="area" value="nonftz" class="hidden" onchange="updateAll()">
-                            <div class="border-2 border-gray-100 rounded-xl py-2 text-center text-xs font-bold transition-all">LUAR BATAM</div>
-                        </label>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Target Margin</label>
-                    <div class="flex gap-2">
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" name="margin" value="0.10" class="hidden" onchange="updateAll()">
-                            <div class="border-2 border-gray-100 rounded-xl py-2 text-center text-xs font-bold transition-all">10%</div>
-                        </label>
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" name="margin" value="0.15" checked class="hidden" onchange="updateAll()">
-                            <div class="border-2 border-gray-100 rounded-xl py-2 text-center text-xs font-bold transition-all">15%</div>
-                        </label>
-                    </div>
-                </div>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-tight">Net Uang Dibayarkan ke Vendor</label>
+                <div class="input-rupiah"><input type="text" id="netInputM" oninput="format(this)" placeholder="0"></div>
             </div>
-
-            <div class="flex bg-gray-100 p-1 rounded-xl mb-8">
-                <button id="btn-maju" onclick="switchTab('maju')" class="flex-1 py-3 text-xs font-bold rounded-lg bg-white shadow-sm text-[#1C2D5A] uppercase">Opsi 1: Hitung Penawaran</button>
-                <button id="btn-mundur" onclick="switchTab('mundur')" class="flex-1 py-3 text-xs font-bold rounded-lg text-gray-400 uppercase">Opsi 2: Reverse Budget</button>
+            <div class="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <input type="checkbox" id="pkpM" class="w-5 h-5 accent-[#1C2D5A]">
+                <label for="pkpM" class="text-sm font-bold text-gray-700">Vendor PKP (Wajib Faktur PPN 1,1%)</label>
             </div>
-
-            <div id="maju" class="tab-content active space-y-6">
-                <div class="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 space-y-4">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-600 mb-2">Uang Net ke Vendor (Dibayarkan)</label>
-                        <div class="input-rupiah"><input type="text" id="netVendorM" onkeyup="formatRupiah(this); hitungMaju();" placeholder="0"></div>
-                    </div>
-                    <label class="flex items-center cursor-pointer bg-white p-3 rounded-xl border border-gray-200">
-                        <input type="checkbox" id="pkpM" onchange="hitungMaju()" class="w-5 h-5 accent-[#1C2D5A]">
-                        <span class="ml-3 text-sm font-bold">Vendor PKP (Ada Faktur PPN 1,1%)</span>
-                    </label>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-600 mb-2">Biaya Operasional Lainnya (KBM/Lainnya)</label>
-                        <div class="input-rupiah"><input type="text" id="lainnyaM" onkeyup="formatRupiah(this); hitungMaju();" placeholder="0"></div>
-                    </div>
-                </div>
-
-                <div class="p-4 space-y-2 text-sm border-2 border-gray-50 rounded-xl">
-                    <div class="flex justify-between"><span>Bruto Vendor (Gross-up PPh 2%)</span><span class="font-bold" id="brutoM">Rp 0</span></div>
-                    <div class="flex justify-between text-blue-600 hidden" id="rowPpnVM"><span>PPN Faktur Vendor (1,1%)</span><span id="ppnVM">+ Rp 0</span></div>
-                    <div class="flex justify-between text-gray-500 italic"><span>Overhead (1%) & COF</span><span id="ovCofM">Rp 0</span></div>
-                    <div class="flex justify-between pt-2 border-t font-bold text-base"><span>Total Biaya Dasar Proyek</span><span id="totalBiayaM">Rp 0</span></div>
-                </div>
-
-                <div class="bg-[#1C2D5A] p-8 rounded-2xl text-center border-b-8 border-[#EF4123]">
-                    <span class="text-[10px] font-black text-white/40 uppercase tracking-widest">Penawaran Minimal ke Customer</span>
-                    <h2 class="text-white text-4xl font-black my-2" id="hasilM">Rp 0</h2>
-                    <div class="text-blue-200 text-xs">
-                        Laba <span id="lblMarginM">15</span>%: <span class="text-white font-bold" id="labaM">Rp 0</span>
-                        <div id="lblPpnC" class="hidden mt-1 opacity-80">DPP: <span id="valDppM">Rp 0</span> | PPN 1,1%: <span id="ppnM">Rp 0</span></div>
-                    </div>
-                </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-tight">Biaya Operasional Lainnya (KBM/Kuli/ATK)</label>
+                <div class="input-rupiah"><input type="text" id="lainM" oninput="format(this)" placeholder="0"></div>
             </div>
-
-            <div id="mundur" class="tab-content space-y-6">
-                <div class="bg-orange-50/50 p-6 rounded-2xl border border-orange-100 space-y-4">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-600 mb-2">Budget Kontrak dari Customer</label>
-                        <div class="input-rupiah"><input type="text" id="budgetRev" onkeyup="formatRupiah(this); hitungMundur();" placeholder="0"></div>
-                    </div>
-                    <label class="flex items-center cursor-pointer bg-white p-3 rounded-xl border border-gray-200">
-                        <input type="checkbox" id="pkpRev" onchange="hitungMundur()" class="w-5 h-5 accent-[#1C2D5A]">
-                        <span class="ml-3 text-sm font-bold">Vendor Rencana PKP</span>
-                    </label>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-600 mb-2">Alokasi Biaya Lainnya</label>
-                        <div class="input-rupiah"><input type="text" id="lainnyaRev" onkeyup="formatRupiah(this); hitungMundur();" placeholder="0"></div>
-                    </div>
-                </div>
-
-                <div class="p-4 space-y-2 text-sm border-2 border-gray-50 rounded-xl">
-                    <div class="flex justify-between"><span>DPP Penawaran</span><span class="font-bold" id="dppRev">Rp 0</span></div>
-                    <div class="flex justify-between text-green-600 font-bold"><span>Laba <span id="lblMarginRev">15</span>% Aman</span><span id="labaRev">- Rp 0</span></div>
-                    <div class="flex justify-between text-gray-500"><span>Alokasi Overhead & COF</span><span id="ovCofRev">- Rp 0</span></div>
-                    <div class="flex justify-between pt-2 border-t font-bold"><span>Sisa Limit Biaya Langsung</span><span id="limitRev">Rp 0</span></div>
-                </div>
-
-                <div class="bg-[#EF4123] p-8 rounded-2xl text-center border-b-8 border-[#1C2D5A]">
-                    <span class="text-[10px] font-black text-white/40 uppercase tracking-widest">Max Bayar ke Vendor (NET)</span>
-                    <h2 class="text-white text-4xl font-black my-2" id="hasilRev">Rp 0</h2>
-                    <p class="text-white/80 text-[10px]">Bruto: <span id="brutoRev">Rp 0</span> | PPh 2%: <span id="pphRev">Rp 0</span> <span id="rowPpnVRev" class="hidden">| PPN V: <span id="ppnVRev">Rp 0</span></span></p>
-                </div>
-            </div>
-
+            <button onclick="calculateMaju()" class="submit-button">Hitung Penawaran Sekarang</button>
         </div>
 
-        <div class="bg-gray-50 p-5 text-center border-t">
-            <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-relaxed">
-                PT Pos Indonesia (Persero) &copy; 2026 • KCU Batam 29400 Corporate Sales Team
-            </p>
+        <div id="resMaju" class="hidden">
+            <div class="result-card bg-forward shadow-lg">
+                <span class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Rekomendasi Minimal Penawaran</span>
+                <h2 id="finalM" class="text-4xl font-black my-2">Rp 0</h2>
+                <p id="labaM" class="text-xs font-bold text-blue-200">LABA AMAN: Rp 0</p>
+            </div>
+            <div class="mt-6 grid grid-cols-2 gap-3 text-[11px] md:text-xs">
+                <div class="p-3 border rounded-xl bg-gray-50"><span>Bruto Vendor:</span> <strong id="brutM" class="float-right text-delft">Rp 0</strong></div>
+                <div class="p-3 border rounded-xl bg-gray-50"><span>PPh 2% Gross-up:</span> <strong id="pphM" class="float-right text-red-500">Rp 0</strong></div>
+                <div class="p-3 border rounded-xl"><span>Overhead (1%):</span> <strong id="ovM" class="float-right">Rp 0</strong></div>
+                <div class="p-3 border rounded-xl"><span>Cost of Fund:</span> <strong id="cofM" class="float-right">Rp 0</strong></div>
+                <div id="ppnCustRowM" class="p-3 border rounded-xl col-span-2 bg-blue-50 hidden"><span>PPN 1,1% Customer (Luar Batam):</span> <strong id="ppnCM" class="float-right">Rp 0</strong></div>
+            </div>
         </div>
     </div>
 
-    <script>
-        // Fungsi Formatter Rupiah
-        function formatRupiah(el) {
-            let val = el.value.replace(/[^,\d]/g, '').toString();
-            let split = val.split(','), sisa = split[0].length % 3, rupiah = split[0].substr(0, sisa),
-                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-            if (ribuan) { rupiah += (sisa ? '.' : '') + ribuan.join('.'); }
-            el.value = rupiah;
+    <div id="sectionMundur" class="mode-section">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="toggle-choice">
+                <span class="block text-[10px] font-black text-gray-400 uppercase mb-2">Wilayah Proyek</span>
+                <div class="flex gap-2">
+                    <input type="radio" name="areaRev" id="areaFTZR" value="ftz" checked>
+                    <label for="areaFTZR">Batam (FTZ)</label>
+                    <input type="radio" name="areaRev" id="areaLuarR" value="nonftz">
+                    <label for="areaLuarR">Luar Batam</label>
+                </div>
+            </div>
+            <div class="toggle-choice">
+                <span class="block text-[10px] font-black text-gray-400 uppercase mb-2">Target Margin</span>
+                <div class="flex gap-2">
+                    <input type="radio" name="marginRev" id="m10R" value="0.10">
+                    <label for="m10R">10%</label>
+                    <input type="radio" name="marginRev" id="m15R" value="0.15" checked>
+                    <label for="m15R">15%</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-tight">Total Nilai Kontrak / Penawaran Customer</label>
+                <div class="input-rupiah"><input type="text" id="budgetInputR" oninput="format(this)" placeholder="0"></div>
+            </div>
+            <div class="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <input type="checkbox" id="pkpR" class="w-5 h-5 accent-[#EF4123]">
+                <label for="pkpR" class="text-sm font-bold text-gray-700">Vendor PKP (Ada PPN 1,1%)</label>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-tight">Alokasi Biaya Lainnya</label>
+                <div class="input-rupiah"><input type="text" id="lainR" oninput="format(this)" placeholder="0"></div>
+            </div>
+            <button onclick="calculateMundur()" class="submit-button" style="background-color: var(--cinnabar);">Jalankan Reverse Budget</button>
+        </div>
+
+        <div id="resMundur" class="hidden">
+            <div class="result-card bg-reverse shadow-lg">
+                <span class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Max Bayar ke Vendor (NET)</span>
+                <h2 id="finalR" class="text-4xl font-black my-2">Rp 0</h2>
+                <p id="brutoR" class="text-xs font-bold text-orange-200">BRUTO DPP: Rp 0</p>
+            </div>
+            <div class="mt-6 grid grid-cols-2 gap-3 text-[11px] md:text-xs">
+                <div class="p-3 border rounded-xl bg-gray-50"><span>DPP Kontrak:</span> <strong id="dppR" class="float-right">Rp 0</strong></div>
+                <div class="p-3 border rounded-xl bg-gray-50"><span>Profit Diamankan:</span> <strong id="labR" class="float-right text-green-600">Rp 0</strong></div>
+                <div class="p-3 border rounded-xl"><span>Potongan Overhead:</span> <strong id="ohR" class="float-right">Rp 0</strong></div>
+                <div class="p-3 border rounded-xl"><span>Potongan COF:</span> <strong id="cofR" class="float-right">Rp 0</strong></div>
+                <div id="rowPpnVendorR" class="p-3 border rounded-xl col-span-2 bg-orange-50 hidden"><span>Pajak Vendor (PPN 1,1%):</span> <strong id="ppnVR" class="float-right">Rp 0</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-6 text-center border-t border-gray-100 bg-gray-50">
+        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-relaxed">
+            PT Pos Indonesia (Persero) &copy; 2026 • KCU Batam 29400 Corporate Sales Team
+        </p>
+    </div>
+</div>
+
+<script>
+    // Tab Navigation
+    function changeTab(mode) {
+        document.getElementById('sectionMaju').className = mode === 'maju' ? 'mode-section active' : 'mode-section';
+        document.getElementById('sectionMundur').className = mode === 'mundur' ? 'mode-section active' : 'mode-section';
+        document.getElementById('tab1').className = mode === 'maju' ? 'tab-btn active' : 'tab-btn inactive';
+        document.getElementById('tab2').className = mode === 'mundur' ? 'tab-btn active' : 'tab-btn inactive';
+    }
+
+    // Currency Formatting
+    function format(el) {
+        let val = el.value.replace(/[^0-9]/g, '');
+        el.value = val.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // Helper functions
+    function parse(v) { return parseFloat(v.replace(/\./g, '')) || 0; }
+    function idr(v) { return "Rp " + Math.round(v).toLocaleString('id-ID').replace(/,/g, '.'); }
+
+    // Constants
+    const COF_RATE = (30/365) * 0.08;
+
+    // Logic Opsi 1
+    function calculateMaju() {
+        const net = parse(document.getElementById('netInputM').value);
+        const lain = parse(document.getElementById('lainM').value);
+        const isNonFTZ = document.querySelector('input[name="areaM"]:checked').value === 'nonftz';
+        const margin = parseFloat(document.querySelector('input[name="marginM"]:checked').value);
+        const isPKP = document.getElementById('pkpM').checked;
+
+        if(!net) { alert("Masukkan nominal biaya vendor!"); return; }
+
+        const bruto = net / 0.98;
+        const ppnVendor = isPKP ? (bruto * 0.011) : 0;
+        const biayaLangsung = bruto + ppnVendor + lain;
+        const oh = biayaLangsung * 0.01;
+        const cof = biayaLangsung * COF_RATE;
+        const totalCost = biayaLangsung + oh + cof;
+
+        const dppPenawaran = totalCost / (1 - margin);
+        const ppnCust = isNonFTZ ? (dppPenawaran * 0.011) : 0;
+        const finalPrice = dppPenawaran + ppnCust;
+
+        // UI Update
+        document.getElementById('resMaju').classList.remove('hidden');
+        document.getElementById('finalM').innerText = idr(finalPrice);
+        document.getElementById('labaM').innerText = "PROFIT " + (margin*100) + "%: " + idr(dppPenawaran - totalCost);
+        document.getElementById('brutM').innerText = idr(bruto);
+        document.getElementById('pphM').innerText = idr(bruto - net);
+        document.getElementById('ovM').innerText = idr(oh);
+        document.getElementById('cofM').innerText = idr(cof);
+        
+        if(isNonFTZ) {
+            document.getElementById('ppnCustRowM').classList.remove('hidden');
+            document.getElementById('ppnCM').innerText = idr(ppnCust);
+        } else {
+            document.getElementById('ppnCustRowM').classList.add('hidden');
+        }
+    }
+
+    // Logic Opsi 2
+    function calculateMundur() {
+        const budget = parse(document.getElementById('budgetInputR').value);
+        const lain = parse(document.getElementById('lainR').value);
+        const isNonFTZ = document.querySelector('input[name="areaRev"]:checked').value === 'nonftz';
+        const margin = parseFloat(document.querySelector('input[name="marginRev"]:checked').value);
+        const isPKP = document.getElementById('pkpR').checked;
+
+        if(!budget) { alert("Masukkan budget customer!"); return; }
+
+        const dppKontrak = isNonFTZ ? (budget / 1.011) : budget;
+        const totalBolehCost = dppKontrak * (1 - margin);
+        const labaAman = dppKontrak - totalBolehCost;
+
+        // BiayaLangsungTotal = totalBolehCost / (1 + 0.01 + COF_RATE)
+        const biayaLangsungTotal = totalBolehCost / (1 + 0.01 + COF_RATE);
+        const factor = isPKP ? 1.011 : 1;
+        
+        const brutoVendor = (biayaLangsungTotal - lain) / factor;
+        const netVendor = brutoVendor * 0.98;
+
+        // UI Update
+        document.getElementById('resMundur').classList.remove('hidden');
+        document.getElementById('finalR').innerText = idr(netVendor);
+        document.getElementById('brutoR').innerText = "BRUTO DPP VENDOR: " + idr(brutoVendor);
+        document.getElementById('dppR').innerText = idr(dppKontrak);
+        document.getElementById('labR').innerText = idr(labaAman);
+        document.getElementById('ohR').innerText = idr(biayaLangsungTotal * 0.01);
+        document.getElementById('cofR').innerText = idr(biayaLangsungTotal * COF_RATE);
+
+        if(isPKP) {
+            document.getElementById('rowPpnVendorR').classList.remove('hidden');
+            document.getElementById('ppnVR').innerText = idr(brutoVendor * 0.011);
+        } else {
+            document.getElementById('rowPpnVendorR').classList.add('hidden');
         }
 
-        // Konversi String ke Angka
-        function n(v) { return parseFloat(v.replace(/\./g, '')) || 0; }
-        // Konversi Angka ke Rupiah
-        function f(v) { return "Rp " + Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
-
-        // Switch Opsi
-        function switchTab(t) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(t).classList.add('active');
-            const isMaju = t === 'maju';
-            document.getElementById('btn-maju').className = isMaju ? "flex-1 py-3 text-xs font-bold rounded-lg bg-white shadow-sm text-[#1C2D5A] uppercase" : "flex-1 py-3 text-xs font-bold rounded-lg text-gray-400 uppercase";
-            document.getElementById('btn-mundur').className = !isMaju ? "flex-1 py-3 text-xs font-bold rounded-lg bg-white shadow-sm text-[#1C2D5A] uppercase" : "flex-1 py-3 text-xs font-bold rounded-lg text-gray-400 uppercase";
+        if(brutoVendor <= 0) {
+            document.getElementById('finalR').innerText = "BUDGET OVER!";
+            document.getElementById('finalR').style.fontSize = "1.5rem";
+        } else {
+            document.getElementById('finalR').style.fontSize = "2.25rem";
         }
+    }
+</script>
 
-        const kCofRatio = (30/365) * 0.08;
-
-        function hitungMaju() {
-            const net = n(document.getElementById('netVendorM').value);
-            const lain = n(document.getElementById('lainnyaM').value);
-            const isNonFTZ = document.querySelector('input[name="area"]:checked').value === 'nonftz';
-            const isPKP = document.getElementById('pkpM').checked;
-            const margin = parseFloat(document.querySelector('input[name="margin"]:checked').value);
-
-            const bruto = net / 0.98;
-            const ppnV = isPKP ? bruto * 0.011 : 0;
-            const bLangsung = bruto + ppnV + lain;
-            
-            const ov = bLangsung * 0.01;
-            const cof = bLangsung * kCofRatio;
-            const totalB = bLangsung + ov + cof;
-            
-            const dppP = totalB / (1 - margin);
-            const ppnC = isNonFTZ ? dppP * 0.011 : 0;
-            const laba = dppP - totalB;
-
-            document.getElementById('brutoM').innerText = f(bruto);
-            document.getElementById('pphM').innerText = "+ " + f(bruto - net);
-            document.getElementById('rowPpnVM').classList.toggle('hidden', !isPKP);
-            document.getElementById('ppnVM').innerText = "+ " + f(ppnV);
-            document.getElementById('ovCofM').innerText = f(ov + cof);
-            document.getElementById('totalBiayaM').innerText = f(totalB);
-            
-            document.getElementById('hasilM').innerText = f(dppP + ppnC);
-            document.getElementById('labaM').innerText = f(laba);
-            document.getElementById('lblMarginM').innerText = margin * 100;
-
-            document.getElementById('lblPpnC').classList.toggle('hidden', !isNonFTZ);
-            document.getElementById('valDppM').innerText = f(dppP);
-            document.getElementById('ppnM').innerText = f(ppnC);
-        }
-
-        function hitungMundur() {
-            const bud = n(document.getElementById('budgetRev').value);
-            const lain = n(document.getElementById('lainnyaRev').value);
-            const isNonFTZ = document.querySelector('input[name="area"]:checked').value === 'nonftz';
-            const isPKP = document.getElementById('pkpRev').checked;
-            const margin = parseFloat(document.querySelector('input[name="margin"]:checked').value);
-
-            const dpp = isNonFTZ ? bud / 1.011 : bud;
-            const limitTotalB = dpp * (1 - margin);
-            const bLangsungTotal = limitTotalB / (1 + 0.01 + kCofRatio);
-            
-            const factor = isPKP ? 1.011 : 1;
-            const bruto = (bLangsungTotal - lain) / factor;
-            const net = bruto * 0.98;
-
-            document.getElementById('dppRev').innerText = f(dpp);
-            document.getElementById('labaRev').innerText = "- " + f(dpp - limitTotalB);
-            document.getElementById('ovCofRev').innerText = "- " + f(limitTotalB - bLangsungTotal);
-            document.getElementById('limitRev').innerText = f(bLangsungTotal);
-            document.getElementById('lblMarginRev').innerText = margin * 100;
-
-            if (bruto < 0) {
-                document.getElementById('hasilRev').innerText = "MINUS!";
-            } else {
-                document.getElementById('hasilRev').innerText = f(net);
-                document.getElementById('brutoRev').innerText = f(bruto);
-                document.getElementById('pphRev').innerText = f(bruto - net);
-                document.getElementById('rowPpnVRev').classList.toggle('hidden', !isPKP);
-                document.getElementById('ppnVRev').innerText = f(bruto * 0.011);
-            }
-        }
-
-        function updateAll() { hitungMaju(); hitungMundur(); }
-    </script>
 </body>
 </html>
