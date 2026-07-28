@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://cba.posnew.com/sitemap.xml

@@ -1,0 +1,176 @@
+{
+  "console_errors": [],
+  "page_errors": [],
+  "tests": [
+    {
+      "name": "title",
+      "ok": true,
+      "actual": "CBA PosNew \u2013 Pricing Calculator"
+    },
+    {
+      "name": "forward bruto vendor",
+      "ok": true,
+      "actual": 100000,
+      "expected": 100000,
+      "tolerance": 0.01
+    },
+    {
+      "name": "forward overhead",
+      "ok": true,
+      "actual": 1000,
+      "expected": 1000,
+      "tolerance": 0.01
+    },
+    {
+      "name": "forward COF",
+      "ok": true,
+      "actual": 657.5342465753424,
+      "expected": 657.5342465753424,
+      "tolerance": 0.01
+    },
+    {
+      "name": "forward final",
+      "ok": true,
+      "actual": 112952.81582952816,
+      "expected": 112952.81582952816,
+      "tolerance": 0.01
+    },
+    {
+      "name": "reverse recovers vendor net",
+      "ok": true,
+      "actual": 98000,
+      "expected": 98000,
+      "tolerance": 0.02
+    },
+    {
+      "name": "zero main input invalid",
+      "ok": true,
+      "actual": {
+        "valid": false,
+        "reason": "MAIN_REQUIRED",
+        "mode": "maju",
+        "area": "ftz",
+        "margin": 0.1
+      }
+    },
+    {
+      "name": "PKP vendor VAT",
+      "ok": true,
+      "actual": 1100,
+      "expected": 1100,
+      "tolerance": 0.01
+    },
+    {
+      "name": "non-FTZ customer VAT",
+      "ok": true,
+      "actual": 1256.1482648401825,
+      "expected": 1256.1482648401825,
+      "tolerance": 0.01
+    },
+    {
+      "name": "non-FTZ final",
+      "ok": true,
+      "actual": 115451.44506849315,
+      "expected": 115451.44506849314,
+      "tolerance": 0.01
+    },
+    {
+      "name": "budget over handled",
+      "ok": true,
+      "actual": {
+        "valid": true,
+        "mode": "mundur",
+        "area": "ftz",
+        "margin": 0.15,
+        "isPKP": false,
+        "netVendor": 100000,
+        "netSDM": 150000,
+        "netGudang": 0,
+        "netOps": 0,
+        "brutoVendorBeforeVat": 0,
+        "vendorVat": 0,
+        "brutoVendor": 0,
+        "brutoSDM": 153061.22448979592,
+        "brutoGudang": 0,
+        "directCost": 83614.06818488073,
+        "overhead": 836.1406818488073,
+        "cof": 549.7911332704485,
+        "baseCost": 85000,
+        "dppOffer": 100000,
+        "customerVat": 0,
+        "finalValue": 0,
+        "profit": 15000,
+        "budgetOver": true,
+        "status": "error"
+      }
+    },
+    {
+      "name": "result visible",
+      "ok": true
+    },
+    {
+      "name": "analysis visible",
+      "ok": true
+    },
+    {
+      "name": "no NaN",
+      "ok": true
+    },
+    {
+      "name": "no Infinity",
+      "ok": true
+    },
+    {
+      "name": "desktop no horizontal overflow",
+      "ok": true,
+      "actual": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      }
+    },
+    {
+      "name": "scenario count 2",
+      "ok": true,
+      "actual": "2"
+    },
+    {
+      "name": "mobile no horizontal overflow",
+      "ok": true,
+      "actual": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      }
+    },
+    {
+      "name": "reset clears main input",
+      "ok": true
+    },
+    {
+      "name": "reset restores empty state",
+      "ok": true
+    }
+  ],
+  "overflow": {
+    "desktop": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440
+    },
+    "mobile": {
+      "scrollWidth": 390,
+      "clientWidth": 390
+    }
+  },
+  "screenshots": [
+    "desktop-full.png",
+    "desktop-form.png",
+    "desktop-result.png",
+    "desktop-analysis.png",
+    "desktop-comparison.png",
+    "desktop-footer.png",
+    "mobile-full.png",
+    "mobile-form.png",
+    "mobile-result.png",
+    "mobile-footer.png"
+  ],
+  "ok": true
+}

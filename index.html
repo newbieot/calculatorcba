@@ -1,430 +1,285 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBA Pricing Calculator by Ikhsan Radiansyah | PosNew Hub</title>
-    <link rel="icon" href="https://admin-piol.posindonesia.co.id/media/logo-posind-dark-1.png" type="image/png">
-    
-    <!-- Tipografi Resmi PosIND -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gantari:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <style>
-        body { 
-            background-color: #F4F6F9;
-            font-family: 'Gantari', sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            margin: 0;
-        }
-
-        .main-wrapper {
-            flex: 1;
-            padding: 20px 20px 40px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-
-        .main-card {
-            width: 100%; max-width: 1000px;
-            background: white; border-radius: 24px;
-            box-shadow: 0 15px 40px -10px rgba(28, 45, 90, 0.1);
-            overflow: hidden; 
-        }
-
-        .logo-nav {
-            background-color: white;
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #F1F5F9;
-        }
-        .logo-nav img { height: 35px; width: auto; object-fit: contain; }
-        @media (max-width: 640px) {
-            .logo-nav { padding: 15px 20px; }
-            .logo-nav img { height: 28px; }
-        }
-
-        .title-header {
-            background-color: #1C2D5A;
-            padding: 25px 30px;
-            text-align: center;
-            border-bottom: 4px solid #EF4123;
-        }
-
-        .input-rupiah { position: relative; }
-        .input-rupiah::before {
-            content: "Rp"; position: absolute; left: 16px; top: 50%;
-            transform: translateY(-50%); color: #64748b; font-weight: 700; font-size: 0.95rem;
-        }
-        .input-rupiah input { 
-            padding-left: 50px; width: 100%; border: 1.5px solid #E2E8F0; 
-            border-radius: 12px; padding-top: 12px; padding-bottom: 12px; outline: none;
-            font-weight: 600; font-size: 1rem; transition: all 0.2s; color: #1C2D5A;
-            font-family: 'Gantari', sans-serif;
-        }
-        .input-rupiah input:focus { 
-            border-color: #1C2D5A; 
-            box-shadow: 0 0 0 4px rgba(28, 45, 90, 0.08); 
-            background-color: #F8FAFF;
-        }
-
-        .tab-btn {
-            flex: 1; padding: 18px; font-weight: 700; font-size: 13px; font-family: 'Sora', sans-serif;
-            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
-            cursor: pointer; border: none; outline: none;
-        }
-        .tab-btn.active { background: white; color: #1C2D5A; border-bottom: 3px solid #1C2D5A; }
-        .tab-btn.inactive { color: #94a3b8; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; }
-
-        .toggle-box input[type="radio"] { display: none; }
-        .toggle-box label {
-            flex: 1; text-align: center; padding: 12px 10px; cursor: pointer;
-            border: 2px solid #E2E8F0; font-size: 12px; font-weight: 700;
-            border-radius: 10px; transition: 0.2s; background: white; color: #475569;
-        }
-        .toggle-box input:checked + label {
-            background-color: #1C2D5A; color: white; border-color: #1C2D5A;
-        }
-
-        .submit-btn {
-            background-color: #1C2D5A; color: white;
-            width: 100%; padding: 18px; border-radius: 14px;
-            font-weight: 700; font-family: 'Sora', sans-serif; text-transform: uppercase; margin-top: 15px;
-            transition: all 0.3s; cursor: pointer; border: none; letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(28, 45, 90, 0.2);
-        }
-        .submit-btn:hover { 
-            background-color: #142142; transform: translateY(-2px); 
-            box-shadow: 0 8px 20px rgba(28, 45, 90, 0.3); 
-        }
-
-        .result-panel {
-            border-radius: 20px; padding: 35px 20px; margin-top: 35px;
-            text-align: center; color: white; transition: all 0.5s ease;
-        }
-        .bg-gradient-blue { background: linear-gradient(135deg, #1C2D5A 0%, #2E4D8A 100%); }
-        .bg-gradient-red { background: linear-gradient(135deg, #EF4123 0%, #FF6B52 100%); }
-
-        .custom-margin-input {
-            width: 80px; border: 2px solid #1C2D5A; border-radius: 8px;
-            padding: 6px 8px; text-align: center; font-weight: 700; color: #1C2D5A; outline: none;
-        }
-        .custom-margin-input:focus { box-shadow: 0 0 0 3px rgba(28, 45, 90, 0.1); }
-
-        /* DASHBOARD FOOTER (UNIVERSAL) */
-        .dashboard-footer {
-            width: 100%;
-            box-sizing: border-box;
-            background-color: #0f172a;
-            border-top: 3px solid #EF4123;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 24px;
-            margin-top: auto;
-            font-family: 'Gantari', sans-serif;
-            z-index: 20;
-        }
-        .footer-brand {
-            display: flex; align-items: center; gap: 8px;
-            color: #f8fafc; font-weight: 700; font-size: 0.95rem; letter-spacing: 0.5px;
-            font-family: 'Sora', sans-serif;
-        }
-        .footer-desc { 
-            color: #94a3b8; font-size: 0.8rem; margin: 0; display: none; 
-        }
-        .footer-creator-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: rgba(239, 65, 35, 0.1); border: 1px solid rgba(239, 65, 35, 0.2);
-            padding: 5px 14px; border-radius: 20px; color: #e2e8f0; font-size: 0.75rem;
-            transition: all 0.3s ease;
-        }
-        .footer-creator-badge:hover { 
-            background: rgba(239, 65, 35, 0.2); border-color: rgba(239, 65, 35, 0.5); 
-        }
-        .footer-creator-badge strong { color: #EF4123; font-weight: 600; }
-
-        @media (min-width: 851px) {
-            .footer-desc { display: block; }
-        }
-        @media (max-width: 850px) {
-            .dashboard-footer { flex-direction: column; gap: 10px; text-align: center; padding: 15px; }
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#172554">
+  <meta name="description" content="Hitung penawaran minimum dan reverse budget layanan logistik dengan rincian biaya, margin, pajak, overhead, dan cost of fund secara transparan.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://cba.posnew.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="CBA PosNew – Pricing Calculator">
+  <meta property="og:description" content="Kalkulator pricing dua arah untuk menghitung penawaran minimum dan batas maksimal pembayaran vendor.">
+  <meta property="og:url" content="https://cba.posnew.com/">
+  <meta property="og:image" content="https://cba.posnew.com/favicon-calculatorcba.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="CBA PosNew – Pricing Calculator">
+  <meta name="twitter:description" content="Pricing calculator layanan logistik berbasis browser.">
+  <title>CBA PosNew – Pricing Calculator</title>
+  <link rel="icon" href="favicon-calculatorcba.png" type="image/png">
+  <link rel="apple-touch-icon" href="favicon-calculatorcba.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="stylesheet" href="assets/css/app.css?v=20260728-1">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"SoftwareApplication",
+    "name":"CBA PosNew Pricing Calculator",
+    "applicationCategory":"BusinessApplication",
+    "operatingSystem":"Web",
+    "url":"https://cba.posnew.com/",
+    "description":"Kalkulator pricing dua arah untuk penawaran minimum dan reverse budget layanan logistik.",
+    "offers":{"@type":"Offer","price":"0","priceCurrency":"IDR"}
+  }
+  </script>
 </head>
 <body>
+  <a class="skip-link" href="#workspace">Lewati ke kalkulator</a>
 
-<div class="main-wrapper">
-    <div class="main-card">
-        <div class="logo-nav">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Danantara_Indonesia.svg/960px-Danantara_Indonesia.svg.png?_=20250304063014" alt="Danantara Indonesia">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/POSIND_2023.svg/330px-POSIND_2023.svg.png" alt="Pos Indonesia (Persero)">
+  <header class="app-header">
+    <div class="header-inner">
+      <a class="brand" href="https://posnew.com/" aria-label="Buka PosNew Hub">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4.5 7.5 7.5 4.2 7.5-4.2M12 12v8.2"/></svg>
+        </span>
+        <span><strong>CBA PosNew</strong><small>Pricing Decision Workspace</small></span>
+      </a>
+      <div class="header-actions">
+        <span class="privacy-pill"><span class="status-dot"></span>Diproses lokal</span>
+        <button class="icon-button" id="openScenariosBtn" type="button" aria-label="Buka skenario tersimpan" title="Skenario tersimpan">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v13A2.5 2.5 0 0 1 17.5 21h-11A2.5 2.5 0 0 1 4 18.5v-13Z"/><path d="M8 3v6h8V3M8 15h8"/></svg>
+          <span id="scenarioCount" class="counter" hidden>0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="pageTitle">
+      <div class="hero-copy">
+        <span class="eyebrow">Strategic Corporate Sales Support</span>
+        <h1 id="pageTitle">Tentukan harga dengan dasar biaya yang jelas.</h1>
+        <p>Hitung penawaran minimum atau balikkan budget customer menjadi batas aman pembayaran vendor—tanpa spreadsheet dan tanpa mengirim data ke server.</p>
+        <div class="hero-badges" aria-label="Keunggulan aplikasi">
+          <span>Formula transparan</span><span>Realtime</span><span>Siap cetak</span>
         </div>
-
-        <div class="title-header">
-            <h1 class="text-white text-xl md:text-2xl font-bold uppercase tracking-tight" style="font-family: 'Sora', sans-serif;">CBA PRICING CALCULATOR</h1>
-            <p class="text-blue-200 text-xs font-bold tracking-widest mt-2 uppercase">Strategic Corporate Sales Support System</p>
+      </div>
+      <div class="hero-summary" aria-label="Ringkasan formula">
+        <div class="summary-orbit"><span>Margin</span><strong id="heroMargin">10%</strong></div>
+        <div class="hero-card">
+          <span>Mode aktif</span>
+          <strong id="heroMode">Hitung Penawaran</strong>
+          <small id="heroModeHint">Biaya → harga minimum</small>
         </div>
+      </div>
+    </section>
 
-        <div class="flex">
-            <button id="tab1" onclick="changeTab('maju')" class="tab-btn active">Opsi 1: Hitung Penawaran</button>
-            <button id="tab2" onclick="changeTab('mundur')" class="tab-btn inactive">Opsi 2: Reverse Budget</button>
-        </div>
+    <nav class="step-nav" aria-label="Navigasi bagian">
+      <a href="#project"><span>1</span>Informasi</a>
+      <a href="#inputs"><span>2</span>Biaya & Asumsi</a>
+      <a href="#resultsPanel"><span>3</span>Hasil</a>
+      <a href="#analysis"><span>4</span>Analisis</a>
+    </nav>
 
-        <div id="formSection" class="p-6 md:p-10">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                <div class="toggle-box">
-                    <span class="block text-xs font-bold text-gray-500 uppercase mb-3 tracking-wider">Wilayah Operasional</span>
-                    <div class="flex gap-3">
-                        <input type="radio" name="area" id="ftz" value="ftz" checked onchange="updateAll()">
-                        <label for="ftz">BATAM (FTZ)</label>
-                        <input type="radio" name="area" id="nonftz" value="nonftz" onchange="updateAll()">
-                        <label for="nonftz">LUAR BATAM</label>
-                    </div>
-                </div>
-                <div class="toggle-box">
-                    <span class="block text-xs font-bold text-gray-500 uppercase mb-3 tracking-wider">Target Margin Profit (%)</span>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <input type="radio" name="margin_opt" id="m10" value="0.10" checked onchange="toggleMarginInput()">
-                        <label for="m10">10%</label>
-                        <input type="radio" name="margin_opt" id="m15" value="0.15" onchange="toggleMarginInput()">
-                        <label for="m15">15%</label>
-                        <input type="radio" name="margin_opt" id="m_custom" value="custom" onchange="toggleMarginInput()">
-                        <label for="m_custom">CUSTOM</label>
-                        
-                        <div id="custom_margin_container" class="hidden flex items-center gap-2 ml-2 mt-2 sm:mt-0">
-                            <input type="number" id="custom_margin_val" class="custom-margin-input" min="10" max="15" step="0.1" value="12.5" oninput="updateAll()">
-                            <span class="text-sm font-bold text-[#1C2D5A]">%</span>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-400 mt-2 font-medium italic">* Rentang Custom: 10% - 15%</p>
-                </div>
+    <section id="workspace" class="workspace" aria-label="Workspace kalkulator">
+      <div class="input-column">
+        <section id="project" class="panel project-panel">
+          <div class="panel-heading">
+            <div><span class="section-kicker">Informasi analisis</span><h2>Identitas skenario</h2></div>
+            <span id="saveState" class="save-state">Belum disimpan</span>
+          </div>
+          <div class="field-grid two">
+            <label class="field"><span>Nama proyek / skenario</span><input id="projectName" type="text" maxlength="80" placeholder="Contoh: Distribusi dokumen Q3"></label>
+            <label class="field"><span>Disusun oleh <em>opsional</em></span><input id="analystName" type="text" maxlength="60" placeholder="Nama penyusun"></label>
+          </div>
+          <label class="field"><span>Catatan <em>opsional</em></span><textarea id="projectNotes" rows="2" maxlength="300" placeholder="Konteks penawaran, asumsi, atau catatan rapat"></textarea></label>
+        </section>
+
+        <section id="inputs" class="panel">
+          <div class="panel-heading">
+            <div><span class="section-kicker">Langkah utama</span><h2>Biaya dan asumsi</h2></div>
+            <span id="calcStatus" class="calc-status incomplete"><span></span>Belum lengkap</span>
+          </div>
+
+          <div class="mode-switch" role="tablist" aria-label="Mode kalkulasi">
+            <button id="tabMaju" class="mode-button active" type="button" role="tab" aria-selected="true" data-mode="maju">
+              <span class="mode-icon"><svg viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg></span>
+              <span><strong>Hitung Penawaran</strong><small>Dari biaya ke harga customer</small></span>
+            </button>
+            <button id="tabMundur" class="mode-button" type="button" role="tab" aria-selected="false" data-mode="mundur">
+              <span class="mode-icon"><svg viewBox="0 0 24 24"><path d="M19 12H5M10 7l-5 5 5 5"/></svg></span>
+              <span><strong>Reverse Budget</strong><small>Dari budget ke batas vendor</small></span>
+            </button>
+          </div>
+
+          <div class="assumption-grid">
+            <fieldset class="choice-group">
+              <legend>Wilayah operasional</legend>
+              <div class="segmented">
+                <label><input type="radio" name="area" value="ftz" checked><span>Batam (FTZ)<small>Tanpa PPN customer</small></span></label>
+                <label><input type="radio" name="area" value="nonftz"><span>Luar Batam<small>PPN customer 1,1%</small></span></label>
+              </div>
+            </fieldset>
+            <fieldset class="choice-group">
+              <legend>Target margin profit</legend>
+              <div class="margin-options">
+                <label><input type="radio" name="margin" value="0.10" checked><span>10%</span></label>
+                <label><input type="radio" name="margin" value="0.15"><span>15%</span></label>
+                <label><input type="radio" name="margin" value="custom"><span>Custom</span></label>
+                <label id="customMarginWrap" class="custom-margin" hidden><input id="customMargin" type="number" min="10" max="15" step="0.1" value="12.5" inputmode="decimal"><span>%</span></label>
+              </div>
+              <small class="helper">Margin custom dibatasi 10%–15%.</small>
+            </fieldset>
+          </div>
+
+          <div class="cost-section">
+            <div class="section-row"><div><span class="section-kicker">Komponen biaya</span><h3>Masukkan nilai bersih</h3></div><button id="clearValuesBtn" class="text-button danger" type="button">Kosongkan angka</button></div>
+
+            <div class="cost-grid">
+              <label class="money-field featured">
+                <span id="mainInputLabel">Uang net ke vendor logistik <b>*</b></span>
+                <span class="money-input"><span>Rp</span><input id="netVendor" type="text" inputmode="numeric" autocomplete="off" placeholder="0" aria-describedby="mainInputHelp mainInputError"></span>
+                <small id="mainInputHelp">Nilai utama yang menjadi dasar kalkulasi.</small>
+                <small id="mainInputError" class="field-error" hidden>Nilai utama wajib lebih dari Rp0.</small>
+              </label>
+
+              <label class="check-card">
+                <input id="pkp" type="checkbox">
+                <span class="check-ui" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 12 4 4 8-8"/></svg></span>
+                <span><strong>Vendor PKP</strong><small>Tambahkan PPN faktur 1,1% pada biaya vendor.</small></span>
+              </label>
+
+              <label class="money-field">
+                <span>Biaya SDM</span>
+                <span class="money-input"><span>Rp</span><input id="netSDM" type="text" inputmode="numeric" autocomplete="off" placeholder="0"></span>
+                <small>Lembur/honorarium; gross-up PPh 21 sebesar 2%.</small>
+              </label>
+
+              <label class="money-field">
+                <span>Biaya gudang & pengepakan</span>
+                <span class="money-input"><span>Rp</span><input id="netGudang" type="text" inputmode="numeric" autocomplete="off" placeholder="0"></span>
+                <small>Gross-up PPh 21 sebesar 2%.</small>
+              </label>
+
+              <label class="money-field">
+                <span>Biaya operasional</span>
+                <span class="money-input"><span>Rp</span><input id="netOps" type="text" inputmode="numeric" autocomplete="off" placeholder="0"></span>
+                <small>ATK, pemasaran, dan biaya non-pajak lainnya.</small>
+              </label>
+            </div>
+          </div>
+
+          <div class="primary-actions">
+            <button id="calculateBtn" class="primary-button" type="button"><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></svg><span>Hitung penawaran</span></button>
+            <button id="resetBtn" class="secondary-button" type="button">Reset</button>
+          </div>
+        </section>
+      </div>
+
+      <aside id="resultsPanel" class="result-column" aria-label="Hasil kalkulasi">
+        <section class="result-shell" aria-live="polite">
+          <div id="emptyResult" class="empty-result">
+            <div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M8 8h8M8 13h3M8 17h8"/></svg></div>
+            <span class="section-kicker">Hasil analisis</span>
+            <h2>Masukkan nilai utama untuk memulai.</h2>
+            <p>Hasil tidak ditampilkan sebagai analisis final sampai data minimum tersedia.</p>
+          </div>
+
+          <div id="resultContent" hidden>
+            <div id="printMeta" class="print-meta"></div>
+            <div class="result-topline"><span id="resultStatus" class="result-status ready">Siap ditawarkan</span><span id="lastUpdated"></span></div>
+            <span id="resultEyebrow" class="section-kicker light">Rekomendasi penawaran minimum</span>
+            <h2 id="finalValue">Rp0</h2>
+            <p id="resultExplanation" class="result-explanation"></p>
+
+            <div class="kpi-grid">
+              <article><span>Profit target</span><strong id="profitValue">Rp0</strong><small id="profitRate">10,0%</small></article>
+              <article><span>Total biaya dasar</span><strong id="baseCostValue">Rp0</strong><small>Langsung + OH + COF</small></article>
+              <article><span>Biaya langsung</span><strong id="directCostValue">Rp0</strong><small>Sebelum OH & COF</small></article>
+              <article><span>PPN customer</span><strong id="customerTaxValue">Rp0</strong><small id="customerTaxHint">FTZ</small></article>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-                <div class="space-y-6">
-                    <div>
-                        <label id="mainLabel" class="block text-xs font-bold text-[#1C2D5A] mb-2 uppercase tracking-wide">Uang Net ke Vendor Logistik</label>
-                        <div class="input-rupiah"><input type="text" id="netVendor" oninput="format(this)" placeholder="0"></div>
-                    </div>
-                    <label class="flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors">
-                        <input type="checkbox" id="pkp" class="w-5 h-5 accent-[#1C2D5A] rounded" onchange="updateAll()">
-                        <div>
-                            <p class="text-sm font-bold text-[#1C2D5A] leading-none">Vendor PKP</p>
-                            <p class="text-xs text-gray-500 mt-1 italic">Ditambah PPN Faktur 1,1%</p>
-                        </div>
-                    </label>
-                    <div class="p-5 bg-blue-50/50 rounded-xl border border-blue-100">
-                        <label class="block text-xs font-bold text-blue-800 mb-2 uppercase tracking-wide">Biaya SDM (Lembur / Honorarium)</label>
-                        <div class="input-rupiah"><input type="text" id="netSDM" oninput="format(this)" placeholder="0"></div>
-                        <p class="text-xs text-blue-600 mt-2 font-medium italic">Termasuk Gross-up PPh 21 (2%)</p>
-                    </div>
-                </div>
-
-                <div class="space-y-6">
-                    <div class="p-5 bg-orange-50/50 rounded-xl border border-orange-100">
-                        <label class="block text-xs font-bold text-orange-800 mb-2 uppercase tracking-wide">Biaya Gudang & Pengepakan</label>
-                        <div class="input-rupiah"><input type="text" id="netGudang" oninput="format(this)" placeholder="0"></div>
-                        <p class="text-xs text-orange-600 mt-2 font-medium italic">Termasuk Gross-up PPh 21 (2%)</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-2 uppercase tracking-wide">Biaya Operasional (Non-Pajak)</label>
-                        <div class="input-rupiah"><input type="text" id="netOps" oninput="format(this)" placeholder="0"></div>
-                        <p class="text-xs text-gray-400 mt-2 font-medium italic">ATK, Pemasaran, dll (Tanpa Pajak)</p>
-                    </div>
-                </div>
+            <div class="result-actions">
+              <button id="saveScenarioBtn" type="button"><svg viewBox="0 0 24 24"><path d="M5 3h12l2 2v16H5V3Z"/><path d="M8 3v6h8V3M8 15h8"/></svg>Simpan</button>
+              <button id="copyBtn" type="button"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Salin</button>
+              <button id="exportBtn" type="button"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Ekspor</button>
+              <button id="printBtn" type="button"><svg viewBox="0 0 24 24"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/></svg>Cetak</button>
             </div>
+          </div>
+        </section>
+      </aside>
+    </section>
 
-            <button onclick="calculate()" id="btnSubmit" class="submit-btn mt-8">Hitung Kalkulasi Sekarang</button>
+    <section id="analysis" class="analysis-shell" hidden>
+      <div class="analysis-heading"><div><span class="section-kicker">Transparansi hasil</span><h2>Rincian dan analisis</h2></div><p>Seluruh angka berasal dari input aktif dan formula aplikasi.</p></div>
 
-            <div id="results" class="hidden">
-                <div id="mainCard" class="result-panel shadow-lg">
-                    <span id="cardTitle" class="text-[11px] font-bold uppercase tracking-widest opacity-80">Hasil Proyeksi</span>
-                    <h2 id="finalVal" class="text-4xl md:text-5xl font-bold my-4" style="font-family: 'Sora', sans-serif;">Rp 0</h2>
-                    <p id="profitVal" class="text-sm font-bold uppercase tracking-wider bg-white/20 py-2.5 rounded-full inline-block px-6">Profit: Rp 0</p>
-                </div>
+      <div class="analysis-grid">
+        <section class="panel breakdown-panel">
+          <div class="panel-heading"><div><span class="section-kicker">Breakdown</span><h3>Komponen perhitungan</h3></div></div>
+          <div class="breakdown-list">
+            <div><span>Bruto vendor <small id="vendorTaxNote">PPh 2%</small></span><strong id="brutoVendor">Rp0</strong></div>
+            <div><span>Bruto SDM <small>PPh 21 2%</small></span><strong id="brutoSDM">Rp0</strong></div>
+            <div><span>Bruto gudang <small>PPh 21 2%</small></span><strong id="brutoGudang">Rp0</strong></div>
+            <div><span>Operasional <small>non-pajak</small></span><strong id="opsValue">Rp0</strong></div>
+            <div class="subtotal"><span>Total biaya langsung</span><strong id="totalDirect">Rp0</strong></div>
+            <div><span>Overhead <small>1%</small></span><strong id="overheadValue">Rp0</strong></div>
+            <div><span>Cost of fund <small>30/365 × 8%</small></span><strong id="cofValue">Rp0</strong></div>
+            <div><span>PPN customer <small>1,1% bila non-FTZ</small></span><strong id="ppnCustomerValue">Rp0</strong></div>
+            <div class="grand-total"><span id="breakdownTotalLabel">Total biaya dasar</span><strong id="breakdownTotalValue">Rp0</strong></div>
+          </div>
+        </section>
 
-                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                    <div class="space-y-3 bg-gray-50 p-5 rounded-xl border border-gray-100">
-                        <h4 class="text-[11px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200 pb-2 mb-3">Breakdown Biaya Langsung</h4>
-                        <div class="flex justify-between text-sm font-medium text-gray-600"><span>Bruto Vendor (PPh 2%):</span><span id="brutoVendor" class="font-bold text-[#1C2D5A]">Rp 0</span></div>
-                        <div class="flex justify-between text-sm font-medium text-gray-600"><span>Bruto SDM (PPh 21):</span><span id="brutoSDM" class="font-bold text-[#1C2D5A]">Rp 0</span></div>
-                        <div class="flex justify-between text-sm font-medium text-gray-600"><span>Bruto Gudang (PPh 21):</span><span id="brutoGudang" class="font-bold text-[#1C2D5A]">Rp 0</span></div>
-                        <div class="flex justify-between text-sm font-bold border-t border-gray-200 pt-3 mt-2"><span>Total Biaya Langsung:</span><span id="totalDirect" class="text-[#1C2D5A]">Rp 0</span></div>
-                    </div>
-                    <div class="space-y-3 bg-gray-50 p-5 rounded-xl border border-gray-100">
-                        <h4 class="text-[11px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200 pb-2 mb-3">Komponen Internal & Pajak</h4>
-                        <div class="flex justify-between text-sm font-medium text-gray-600"><span>Overhead (1%):</span><span id="ovVal">Rp 0</span></div>
-                        <div class="flex justify-between text-sm font-medium text-gray-600"><span>Cost of Fund (COF):</span><span id="cofVal">Rp 0</span></div>
-                        <div class="flex justify-between text-sm font-medium text-blue-600 italic"><span>PPN Customer (1,1%):</span><span id="ppnCustVal">Rp 0</span></div>
-                        <div class="flex justify-between text-sm font-bold border-t border-gray-200 pt-3 mt-2"><span>Total Biaya Dasar:</span><span id="totalBase" class="text-[#1C2D5A]">Rp 0</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+        <section class="panel chart-panel">
+          <div class="panel-heading"><div><span class="section-kicker">Visualisasi</span><h3>Komposisi nilai</h3></div></div>
+          <div id="chart" class="bar-chart" role="img" aria-label="Grafik komposisi nilai kalkulasi"></div>
+          <div id="chartLegend" class="chart-legend"></div>
+        </section>
 
-<footer class="dashboard-footer">
-    <div class="footer-brand">
-        <i data-lucide="layers" style="color: #EF4123; width: 18px; height: 18px;"></i>
-        PosNew Hub
-    </div>
-    <p class="footer-desc">Sistem utilitas ini dikembangkan secara independen untuk optimalisasi efisiensi layanan logistik B2B dan Ritel.</p>
-    <div class="footer-creator-badge">
-        <i data-lucide="code-2" style="color: #EF4123; width: 14px; height: 14px;"></i>
-        Inovasi oleh <strong>Ikhsan Radiansyah</strong> &copy; 2026
-    </div>
-</footer>
+        <section class="panel formula-panel">
+          <div class="panel-heading"><div><span class="section-kicker">Cara perhitungan</span><h3>Formula aktif</h3></div></div>
+          <div id="formulaSteps" class="formula-steps"></div>
+          <p class="rounding-note">Nilai internal dihitung dengan presisi penuh; tampilan Rupiah dibulatkan ke rupiah terdekat.</p>
+        </section>
 
-<script src="https://unpkg.com/lucide@latest"></script>
-<script>
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
+        <section class="panel sensitivity-panel">
+          <div class="panel-heading"><div><span class="section-kicker">Sensitivitas</span><h3>Dampak perubahan margin</h3></div></div>
+          <p class="panel-intro">Perbandingan menggunakan input yang sama tanpa mengubah skenario utama.</p>
+          <div class="table-wrap"><table><thead><tr><th>Margin</th><th id="sensitivityOutputHeading">Penawaran</th><th>Profit</th><th>Status</th></tr></thead><tbody id="sensitivityBody"></tbody></table></div>
+        </section>
+      </div>
 
-    let mode = 'maju';
+      <section id="comparisonSection" class="panel comparison-panel" hidden>
+        <div class="panel-heading"><div><span class="section-kicker">Skenario tersimpan</span><h3>Perbandingan cepat</h3></div><button id="clearScenariosBtn" class="text-button danger" type="button">Hapus semua</button></div>
+        <div class="table-wrap"><table><thead><tr><th>Nama</th><th>Mode</th><th>Margin</th><th>Hasil utama</th><th>Profit</th><th></th></tr></thead><tbody id="comparisonBody"></tbody></table></div>
+      </section>
 
-    function changeTab(m) {
-        mode = m;
-        const t1 = document.getElementById('tab1');
-        const t2 = document.getElementById('tab2');
-        const label = document.getElementById('mainLabel');
-        const btn = document.getElementById('btnSubmit');
+      <aside class="disclaimer"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><p><strong>Catatan penggunaan.</strong> Hasil kalkulasi merupakan alat bantu pricing berdasarkan data dan asumsi yang dimasukkan pengguna. Hasil tidak menggantikan kajian keuangan, pajak, hukum, atau keputusan manajemen resmi.</p></aside>
+    </section>
+  </main>
 
-        if(mode === 'maju') {
-            t1.className = 'tab-btn active'; t2.className = 'tab-btn inactive';
-            label.innerText = 'Uang Net ke Vendor Logistik';
-            btn.innerHTML = 'Hitung Penawaran Sekarang';
-            btn.style.backgroundColor = '#1C2D5A';
-        } else {
-            t1.className = 'tab-btn inactive'; t2.className = 'tab-btn active';
-            label.innerText = 'Total Budget Kontrak Customer';
-            btn.innerHTML = 'Jalankan Reverse Budget';
-            btn.style.backgroundColor = '#EF4123';
-        }
-        updateAll();
-    }
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-    function toggleMarginInput() {
-        const customOpt = document.getElementById('m_custom').checked;
-        const container = document.getElementById('custom_margin_container');
-        if(customOpt) {
-            container.classList.remove('hidden');
-        } else {
-            container.classList.add('hidden');
-        }
-        updateAll();
-    }
+  <dialog id="scenarioDialog" class="scenario-dialog" aria-labelledby="scenarioDialogTitle">
+    <form method="dialog" class="dialog-shell">
+      <div class="dialog-heading"><div><span class="section-kicker">Data perangkat ini</span><h2 id="scenarioDialogTitle">Skenario tersimpan</h2></div><button class="dialog-close" value="cancel" aria-label="Tutup dialog">×</button></div>
+      <p>Skenario disimpan hanya pada browser ini. Pilih skenario untuk memuat kembali seluruh input.</p>
+      <div id="scenarioList" class="scenario-list"></div>
+    </form>
+  </dialog>
 
-    function format(el) {
-        let val = el.value.replace(/[^0-9]/g, '');
-        el.value = val.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
+  <footer class="dashboard-footer">
+    <a class="footer-brand" href="https://posnew.com/">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4.5 7.5 7.5 4.2 7.5-4.2M12 12v8.2"/></svg>
+      PosNew Hub
+    </a>
+    <p class="footer-desc">Practical tools for smarter business decisions.</p>
+    <a class="footer-creator-badge" href="https://posnew.com/about-me.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 9-3 3 3 3M16 9l3 3-3 3M14 5l-4 14"/></svg>
+      Created by <strong>Ikhsan Radiansyah</strong> · 2026
+    </a>
+  </footer>
 
-    function n(id) { return parseFloat(document.getElementById(id).value.replace(/\./g, '')) || 0; }
-    function idr(v) { return "Rp " + Math.round(v).toLocaleString('id-ID').replace(/,/g, '.'); }
-
-    const COF_RATE = (30/365) * 0.08;
-
-    function calculate() {
-        const inputMain = n('netVendor');
-        const netSDM = n('netSDM');
-        const netGudang = n('netGudang');
-        const netOps = n('netOps');
-        
-        const isNonFTZ = document.querySelector('input[name="area"]:checked').value === 'nonftz';
-        const isPKP = document.getElementById('pkp').checked;
-
-        let margin;
-        const marginOpt = document.querySelector('input[name="margin_opt"]:checked').value;
-        if(marginOpt === 'custom') {
-            const customVal = parseFloat(document.getElementById('custom_margin_val').value);
-            margin = Math.max(10, Math.min(15, customVal)) / 100;
-        } else {
-            margin = parseFloat(marginOpt);
-        }
-
-        if(inputMain === 0) {
-            alert("Silakan isi nilai input utama terlebih dahulu.");
-            return;
-        }
-
-        document.getElementById('results').classList.remove('hidden');
-        const card = document.getElementById('mainCard');
-
-        if(mode === 'maju') {
-            card.className = "result-panel bg-gradient-blue shadow-lg";
-            document.getElementById('cardTitle').innerText = "Rekomendasi Penawaran Minimal";
-
-            const brutoVendor = inputMain / 0.98;
-            const brutoSDM = netSDM / 0.98;
-            const brutoGudang = netGudang / 0.98;
-            const ppnVendor = isPKP ? (brutoVendor * 0.011) : 0;
-
-            const biayaLangsungTotal = brutoVendor + ppnVendor + brutoSDM + brutoGudang + netOps;
-            const oh = biayaLangsungTotal * 0.01;
-            const cof = biayaLangsungTotal * COF_RATE;
-            const totalInternalCost = biayaLangsungTotal + oh + cof;
-
-            const dppPenawaran = totalInternalCost / (1 - margin);
-            const ppnCust = isNonFTZ ? (dppPenawaran * 0.011) : 0;
-            const finalQuote = dppPenawaran + ppnCust;
-
-            document.getElementById('finalVal').innerText = idr(finalQuote);
-            document.getElementById('profitVal').innerText = "PROFIT " + (margin*100).toFixed(1) + "%: " + idr(dppPenawaran - totalInternalCost);
-            document.getElementById('brutoVendor').innerText = idr(brutoVendor + ppnVendor);
-            document.getElementById('brutoSDM').innerText = idr(brutoSDM);
-            document.getElementById('brutoGudang').innerText = idr(brutoGudang);
-            document.getElementById('totalDirect').innerText = idr(biayaLangsungTotal);
-            document.getElementById('ovVal').innerText = idr(oh);
-            document.getElementById('cofVal').innerText = idr(cof);
-            document.getElementById('ppnCustVal').innerText = idr(ppnCust);
-            document.getElementById('totalBase').innerText = idr(totalInternalCost);
-
-        } else {
-            card.className = "result-panel bg-gradient-red shadow-lg";
-            document.getElementById('cardTitle').innerText = "Batas Maksimal Bayar Vendor (NET)";
-
-            const dppPenawaran = isNonFTZ ? (inputMain / 1.011) : inputMain;
-            const targetTotalCost = dppPenawaran * (1 - margin);
-            
-            const brutoSDM = netSDM / 0.98;
-            const brutoGudang = netGudang / 0.98;
-
-            const biayaLangsungTotal = targetTotalCost / (1 + 0.01 + COF_RATE);
-            const factorVendor = isPKP ? 1.011 : 1;
-
-            const brutoVendor = (biayaLangsungTotal - brutoSDM - brutoGudang - netOps) / factorVendor;
-            const netVendorRes = brutoVendor * 0.98;
-
-            document.getElementById('finalVal').innerText = brutoVendor > 0 ? idr(netVendorRes) : "BUDGET OVER!";
-            document.getElementById('profitVal').innerText = "PROFIT " + (margin*100).toFixed(1) + "% DIAMANKAN: " + idr(dppPenawaran - targetTotalCost);
-            document.getElementById('brutoVendor').innerText = idr(brutoVendor > 0 ? brutoVendor : 0);
-            document.getElementById('brutoSDM').innerText = idr(brutoSDM);
-            document.getElementById('brutoGudang').innerText = idr(brutoGudang);
-            document.getElementById('totalDirect').innerText = idr(biayaLangsungTotal);
-            document.getElementById('ovVal').innerText = "- " + idr(biayaLangsungTotal * 0.01);
-            document.getElementById('cofVal').innerText = "- " + idr(biayaLangsungTotal * COF_RATE);
-            document.getElementById('ppnCustVal').innerText = "- " + idr(inputMain - dppPenawaran);
-            document.getElementById('totalBase').innerText = idr(targetTotalCost);
-        }
-    }
-
-    function updateAll() { 
-        if(!document.getElementById('results').classList.contains('hidden')) {
-            calculate(); 
-        }
-    }
-</script>
-
+  <noscript><div class="noscript">JavaScript harus diaktifkan untuk menggunakan kalkulator ini.</div></noscript>
+  <script src="assets/js/app.js?v=20260728-1" defer></script>
 </body>
 </html>
