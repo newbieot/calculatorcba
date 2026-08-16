@@ -31,7 +31,7 @@
   function calculatePricing(input) {
     const mode = input.mode === 'mundur' ? 'mundur' : 'maju';
     const area = input.area === 'nonftz' ? 'nonftz' : 'ftz';
-    const margin = Math.min(0.15, Math.max(0.10, Number(input.margin) || 0.10));
+    const margin = Math.min(0.15, Math.max(0.10, Number(input.margin) || 0.15));
     const netVendor = toNumber(input.netVendor);
     const netSDM = toNumber(input.netSDM);
     const netGudang = toNumber(input.netGudang);
@@ -96,7 +96,7 @@
 
   function getMargin(showError = false) {
     const option = selectedValue('margin');
-    if (option !== 'custom') return Number(option || 0.10);
+    if (option !== 'custom') return Number(option || 0.15);
     const field = $('customMargin');
     const raw = Number(field.value);
     const valid = Number.isFinite(raw) && raw >= 10 && raw <= 15;
@@ -380,7 +380,7 @@
     state.mode = 'maju'; state.result = null; state.hasCalculated = false;
     $('projectName').value = ''; $('analystName').value = ''; $('projectNotes').value = '';
     document.querySelector('input[name="area"][value="ftz"]').checked = true;
-    document.querySelector('input[name="margin"][value="0.10"]').checked = true;
+    document.querySelector('input[name="margin"][value="0.15"]').checked = true;
     $('customMargin').value = '12.5'; $('pkp').checked = false;
     moneyIds.forEach((id) => { $(id).value = ''; });
     $('emptyResult').hidden = false; $('resultContent').hidden = true; $('analysis').hidden = true;
