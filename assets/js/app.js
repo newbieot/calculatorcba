@@ -28,6 +28,15 @@
     return new Intl.NumberFormat('id-ID', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value);
   }
 
+  function parseMargin(value) {
+    const normalized = String(value ?? '').trim().replace(/%/g, '').replace(',', '.');
+    return /^\d+(?:\.\d+)?$/.test(normalized) ? Number(normalized) : NaN;
+  }
+
+  function formatMargin(value) {
+    return Number(value).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
+
   function calculatePricing(input) {
     const mode = input.mode === 'mundur' ? 'mundur' : 'maju';
     const area = input.area === 'nonftz' ? 'nonftz' : 'ftz';
@@ -98,7 +107,7 @@
     const option = selectedValue('margin');
     if (option !== 'custom') return Number(option || 0.15);
     const field = $('customMargin');
-    const raw = Number(field.value);
+    const raw = parseMargin(field.value);
     const valid = Number.isFinite(raw) && raw >= 10 && raw <= 15;
     field.setAttribute('aria-invalid', String(!valid));
     if (!valid && showError) showToast('Margin custom harus berada antara 10% dan 15%.', 'error');
@@ -154,8 +163,11 @@
   function updateMarginUI() {
     const custom = selectedValue('margin') === 'custom';
     $('customMarginWrap').hidden = !custom;
+    $('customMarginSliderWrap').hidden = !custom;
     const margin = getMargin(false);
-    $('heroMargin').textContent = margin === null ? '—' : `${(margin * 100).toLocaleString('id-ID', { maximumFractionDigits: 1 })}%`;
+    const display = margin === null ? '—' : `${formatMargin(margin * 100)}%`;
+    $('heroMargin').textContent = display;
+    $('customMarginValue').textContent = display;
   }
 
   function calculateAndRender({ showErrors = false, scroll = false } = {}) {
@@ -355,7 +367,9 @@
     document.querySelector(`input[name="area"][value="${input.area}"]`).checked = true;
     const preset = [0.10, 0.15].includes(Number(input.margin)) ? String(Number(input.margin).toFixed(2)) : 'custom';
     document.querySelector(`input[name="margin"][value="${preset}"]`).checked = true;
-    $('customMargin').value = (Number(input.margin) * 100).toFixed(1);
+    const customMargin = Number(input.margin) * 100;
+    $('customMargin').value = formatMargin(customMargin);
+    $('customMarginSlider').value = customMargin;
     $('pkp').checked = Boolean(input.isPKP);
     moneyIds.forEach((idKey) => { $(idKey).value = formatInputValue(input[idKey]); });
     $('projectName').value = item.projectName || '';
@@ -381,7 +395,7 @@
     $('projectName').value = ''; $('analystName').value = ''; $('projectNotes').value = '';
     document.querySelector('input[name="area"][value="ftz"]').checked = true;
     document.querySelector('input[name="margin"][value="0.15"]').checked = true;
-    $('customMargin').value = '12.5'; $('pkp').checked = false;
+    $('customMargin').value = '12,5'; $('customMarginSlider').value = '12.5'; $('pkp').checked = false;
     moneyIds.forEach((id) => { $(id).value = ''; });
     $('emptyResult').hidden = false; $('resultContent').hidden = true; $('analysis').hidden = true;
     $('saveState').textContent = 'Belum disimpan';
@@ -449,7 +463,20 @@
       if (state.hasCalculated) calculateAndRender();
     }));
     document.querySelectorAll('input[name="area"],input[name="margin"]').forEach((input) => input.addEventListener('change', realtime));
-    $('customMargin').addEventListener('input', realtime);
+    $('customMargin').addEventListener('input', () => {
+      const value = parseMargin($('customMargin').value);
+      if (Number.isFinite(value) && value >= 10 && value <= 15) $('customMarginSlider').value = value;
+      realtime();
+    });
+    $('customMargin').addEventListener('blur', () => {
+      const value = parseMargin($('customMargin').value);
+      if (Number.isFinite(value) && value >= 10 && value <= 15) $('customMargin').value = formatMargin(value);
+      updateMarginUI();
+    });
+    $('customMarginSlider').addEventListener('input', () => {
+      $('customMargin').value = formatMargin($('customMarginSlider').value);
+      realtime();
+    });
     $('pkp').addEventListener('change', realtime);
     moneyIds.forEach((id) => $(id).addEventListener('input', (event) => {
       const caretAtEnd = event.target.selectionStart === event.target.value.length;

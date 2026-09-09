@@ -126,9 +126,13 @@
                 <label><input type="radio" name="margin" value="0.10"><span>10%</span></label>
                 <label><input type="radio" name="margin" value="0.15" checked><span>15%</span></label>
                 <label><input type="radio" name="margin" value="custom"><span>Custom</span></label>
-                <label id="customMarginWrap" class="custom-margin" hidden><input id="customMargin" type="number" min="10" max="15" step="0.1" value="12.5" inputmode="decimal"><span>%</span></label>
+                <label id="customMarginWrap" class="custom-margin" hidden><span class="sr-only">Margin custom</span><input id="customMargin" type="text" value="12,5" inputmode="decimal" autocomplete="off" aria-describedby="customMarginHelp"><span>%</span></label>
               </div>
-              <small class="helper">Margin custom dibatasi 10%–15%.</small>
+              <div id="customMarginSliderWrap" class="margin-slider" hidden>
+                <label for="customMarginSlider">Geser margin <output id="customMarginValue" for="customMarginSlider">12,5%</output></label>
+                <input id="customMarginSlider" type="range" min="10" max="15" step="0.01" value="12.5">
+              </div>
+              <small id="customMarginHelp" class="helper">Margin custom dibatasi 10%–15%. Gunakan koma atau titik untuk desimal, misalnya 12,56%.</small>
             </fieldset>
           </div>
 
