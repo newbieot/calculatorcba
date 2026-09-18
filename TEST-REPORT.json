@@ -8,6 +8,43 @@
       "actual": "CBA PosNew \u2013 Pricing Calculator"
     },
     {
+      "name": "Excel workflow exposes the document form",
+      "ok": true
+    },
+    {
+      "name": "default Emy vendor data is automatic and read-only",
+      "ok": true,
+      "actual": {
+        "name": "CV EMY RIZKY JAYA",
+        "nib": "9120401921208",
+        "npwp": "92.813.868.4-215.000"
+      }
+    },
+    {
+      "name": "other vendor data is editable and required",
+      "ok": true
+    },
+    {
+      "name": "other vendor draft survives option switching",
+      "ok": true
+    },
+    {
+      "name": "generated workbook has requested sheets only",
+      "ok": true,
+      "actual": [
+        "CBA2",
+        "Rekap CBA 1",
+        "RBL",
+        "RBL 2",
+        "SOW Shadow"
+      ]
+    },
+    {
+      "name": "generated workbook formula error scan",
+      "ok": true,
+      "actual": 0
+    },
+    {
       "name": "forward bruto vendor",
       "ok": true,
       "actual": 100000,

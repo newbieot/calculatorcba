@@ -4,9 +4,30 @@
   const COF_RATE = (30 / 365) * 0.08;
   const STORAGE_KEY = 'cba-posnew-scenarios-v2';
   const MAX_SCENARIOS = 20;
-  const state = { mode: 'maju', result: null, hasCalculated: false, scenarios: [] };
+  const DEFAULT_VENDOR = Object.freeze({
+    name: 'CV EMY RIZKY JAYA',
+    nib: '9120401921208',
+    npwp: '92.813.868.4-215.000'
+  });
+  const state = {
+    workflow: 'calculate',
+    mode: 'maju',
+    result: null,
+    hasCalculated: false,
+    scenarios: [],
+    vendorChoice: 'emy',
+    otherVendor: { name: '', nib: '', npwp: '' }
+  };
   const $ = (id) => document.getElementById(id);
   const moneyIds = ['netVendor', 'netSDM', 'netGudang', 'netOps'];
+  const excelFieldIds = [
+    'projectId', 'customerName', 'commodity', 'serviceType', 'transportMode', 'paymentTerm',
+    'startDate', 'endDate', 'shipmentWeight', 'packageCount', 'originCity', 'destinationCity',
+    'originAddress', 'destinationAddress', 'customerPic', 'customerPhone', 'customerEmail',
+    'internalPic', 'customerAddress', 'projectLocation', 'operationPattern', 'vehicleType',
+    'estimatedTrip', 'cargoType', 'shipmentForm', 'projectPurpose', 'packageDimensions',
+    'vendorName', 'vendorNib', 'vendorNpwp', 'executionFrequency', 'operationDescription'
+  ];
 
   function toNumber(value) {
     if (typeof value === 'number') return Number.isFinite(value) ? Math.max(0, value) : 0;
@@ -154,10 +175,148 @@
     $('mainInputHelp').textContent = forward ? 'Nilai net vendor menjadi dasar pembentukan harga customer.' : 'Total budget customer menjadi batas untuk menghitung kemampuan bayar vendor.';
     $('calculateBtn').classList.toggle('reverse', !forward);
     $('calculateBtn').querySelector('span').textContent = forward ? 'Hitung penawaran' : 'Jalankan reverse budget';
-    $('heroMode').textContent = forward ? 'Hitung Penawaran' : 'Reverse Budget';
-    $('heroModeHint').textContent = forward ? 'Biaya → harga minimum' : 'Budget → batas vendor';
+    $('heroMode').textContent = state.workflow === 'excel' ? 'Buat Excel CBA' : (forward ? 'Hitung Penawaran' : 'Reverse Budget');
+    $('heroModeHint').textContent = state.workflow === 'excel' ? 'Hitung → lengkapi data → unduh' : (forward ? 'Biaya → harga minimum' : 'Budget → batas vendor');
     $('sensitivityOutputHeading').textContent = forward ? 'Penawaran' : 'Batas vendor';
-    document.title = forward ? 'CBA PosNew – Pricing Calculator' : 'CBA PosNew – Reverse Budget';
+    document.title = state.workflow === 'excel' ? 'CBA PosNew – Buat Excel CBA' : (forward ? 'CBA PosNew – Pricing Calculator' : 'CBA PosNew – Reverse Budget');
+  }
+
+  function setWorkflow(workflow, { scroll = false } = {}) {
+    const excel = workflow === 'excel';
+    state.workflow = excel ? 'excel' : 'calculate';
+    if (excel && state.mode !== 'maju') state.mode = 'maju';
+    $('workflowCalculate').classList.toggle('active', !excel);
+    $('workflowExcel').classList.toggle('active', excel);
+    $('workflowCalculate').setAttribute('aria-selected', String(!excel));
+    $('workflowExcel').setAttribute('aria-selected', String(excel));
+    $('excelDetails').hidden = !excel;
+    $('excelNavLink').hidden = !excel;
+    $('analysisStepNumber').textContent = excel ? '5' : '4';
+    document.querySelector('.step-nav').classList.toggle('excel-workflow', excel);
+    document.querySelector('.mode-switch').classList.toggle('single', excel);
+    $('tabMundur').hidden = excel;
+    $('excelModeNote').hidden = !excel;
+    $('exportBtn').hidden = !excel;
+    $('projectSectionKicker').textContent = excel ? 'Informasi dokumen' : 'Informasi analisis';
+    $('projectSectionTitle').textContent = excel ? 'Judul proyek' : 'Identitas skenario';
+    document.body.classList.toggle('excel-workflow-active', excel);
+    $('projectName').setAttribute('aria-required', String(excel));
+    updateModeUI();
+    updateExcelCompletion();
+    if (state.hasCalculated) calculateAndRender();
+    if (excel && scroll) $('project').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function collectExcelDetails() {
+    const details = {};
+    excelFieldIds.forEach((id) => { details[id] = $(id).value.trim(); });
+    details.vendorChoice = selectedValue('vendorChoice');
+    details.projectName = $('projectName').value.trim();
+    details.analystName = $('analystName').value.trim();
+    details.projectNotes = $('projectNotes').value.trim();
+    details.shipmentWeight = Number(details.shipmentWeight || 0);
+    details.packageCount = Number(details.packageCount || 0);
+    return details;
+  }
+
+  function updateVendorChoice({ preserveCurrent = true } = {}) {
+    const nextChoice = selectedValue('vendorChoice') === 'other' ? 'other' : 'emy';
+    const name = $('vendorName');
+    const nib = $('vendorNib');
+    const npwp = $('vendorNpwp');
+    const fields = [name, nib, npwp];
+
+    if (preserveCurrent && state.vendorChoice === 'other') {
+      state.otherVendor = { name: name.value.trim(), nib: nib.value.trim(), npwp: npwp.value.trim() };
+    }
+
+    state.vendorChoice = nextChoice;
+    const isOther = nextChoice === 'other';
+    fields.forEach((field) => {
+      field.readOnly = !isOther;
+      field.setAttribute('aria-readonly', String(!isOther));
+      field.closest('.field')?.classList.toggle('auto-filled', !isOther);
+      field.removeAttribute('aria-invalid');
+    });
+
+    if (isOther) {
+      name.value = state.otherVendor.name;
+      nib.value = state.otherVendor.nib;
+      npwp.value = state.otherVendor.npwp;
+      name.placeholder = 'Nama vendor lain';
+      nib.placeholder = 'Masukkan NIB vendor';
+      npwp.placeholder = 'Masukkan NPWP vendor';
+      fields.forEach((field) => field.setAttribute('data-excel-required', ''));
+      name.focus();
+    } else {
+      name.value = DEFAULT_VENDOR.name;
+      nib.value = DEFAULT_VENDOR.nib;
+      npwp.value = DEFAULT_VENDOR.npwp;
+      fields.forEach((field) => { field.placeholder = ''; });
+      nib.removeAttribute('data-excel-required');
+      npwp.removeAttribute('data-excel-required');
+    }
+
+    updateExcelCompletion();
+  }
+
+  function requiredExcelFields() {
+    return [$('projectName'), ...document.querySelectorAll('[data-excel-required]')];
+  }
+
+  function isExcelFieldValid(field) {
+    if (!String(field.value || '').trim()) return false;
+    if (field.type === 'number') return Number(field.value) > 0;
+    if (field.type === 'email') return field.validity.valid;
+    return true;
+  }
+
+  function updateExcelCompletion() {
+    const fields = requiredExcelFields();
+    const complete = fields.filter(isExcelFieldValid).length;
+    const percentComplete = fields.length ? Math.round((complete / fields.length) * 100) : 0;
+    const status = $('excelCompletion');
+    const ready = percentComplete === 100 && state.result && state.result.valid && !state.result.budgetOver && state.mode === 'maju';
+    status.className = `calc-status ${ready ? 'ready' : 'incomplete'}`;
+    status.innerHTML = `<span></span>${percentComplete}% lengkap`;
+    const summary = $('excelValidationSummary');
+    if (ready) {
+      summary.className = 'excel-validation ready';
+      summary.textContent = 'Data dokumen dan perhitungan siap. Workbook dapat dibuat.';
+    } else {
+      summary.className = 'excel-validation';
+      const missing = fields.length - complete;
+      summary.textContent = missing > 0
+        ? `${missing} data wajib belum lengkap. Jalankan perhitungan setelah semua data terisi.`
+        : 'Data dokumen lengkap. Jalankan perhitungan untuk membuat workbook.';
+    }
+  }
+
+  function validateExcelDetails(showErrors = false) {
+    const fields = requiredExcelFields();
+    let firstInvalid = null;
+    fields.forEach((field) => {
+      const valid = isExcelFieldValid(field);
+      field.setAttribute('aria-invalid', String(!valid && showErrors));
+      if (!valid && !firstInvalid) firstInvalid = field;
+    });
+    const email = $('customerEmail');
+    const emailValid = !email.value.trim() || email.validity.valid;
+    email.setAttribute('aria-invalid', String(!emailValid && showErrors));
+    if (!emailValid && !firstInvalid) firstInvalid = email;
+    const dateOrderValid = !$('startDate').value || !$('endDate').value || $('endDate').value >= $('startDate').value;
+    if (!dateOrderValid) {
+      $('endDate').setAttribute('aria-invalid', String(showErrors));
+      firstInvalid ||= $('endDate');
+    }
+    updateExcelCompletion();
+    if (firstInvalid && showErrors) {
+      $('excelValidationSummary').className = 'excel-validation error';
+      $('excelValidationSummary').textContent = dateOrderValid ? 'Periksa data wajib yang masih kosong atau tidak valid.' : 'Tanggal selesai tidak boleh lebih awal dari tanggal mulai.';
+      firstInvalid.focus();
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return !firstInvalid;
   }
 
   function updateMarginUI() {
@@ -174,6 +333,7 @@
     if (!validate(showErrors)) {
       state.result = null;
       setCalcStatus(showErrors ? 'error' : 'incomplete', showErrors ? 'Periksa input' : 'Belum lengkap');
+      updateExcelCompletion();
       if (showErrors) $('netVendor').focus();
       return false;
     }
@@ -183,6 +343,7 @@
     state.hasCalculated = true;
     renderResult(result);
     setCalcStatus(result.budgetOver ? 'error' : 'ready', result.budgetOver ? 'Budget tidak cukup' : 'Up to date');
+    updateExcelCompletion();
     $('saveState').textContent = 'Perubahan belum disimpan';
     if (scroll && window.matchMedia('(max-width: 960px)').matches) $('resultsPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
     return true;
@@ -363,6 +524,7 @@
     const item = state.scenarios.find((scenario) => scenario.id === id);
     if (!item) return;
     const input = item.input;
+    if (state.workflow === 'excel' && input.mode === 'mundur') setWorkflow('calculate');
     state.mode = input.mode;
     document.querySelector(`input[name="area"][value="${input.area}"]`).checked = true;
     const preset = [0.10, 0.15].includes(Number(input.margin)) ? String(Number(input.margin).toFixed(2)) : 'custom';
@@ -378,6 +540,7 @@
     updateModeUI();
     updateMarginUI();
     calculateAndRender();
+    updateExcelCompletion();
     $('saveState').textContent = 'Skenario dimuat';
     if ($('scenarioDialog').open) $('scenarioDialog').close();
     showToast(`Skenario “${item.projectName}” dimuat.`);
@@ -393,15 +556,23 @@
   function resetAll() {
     state.mode = 'maju'; state.result = null; state.hasCalculated = false;
     $('projectName').value = ''; $('analystName').value = ''; $('projectNotes').value = '';
+    document.querySelectorAll('#excelDetails input,#excelDetails textarea').forEach((field) => {
+      field.value = field.defaultValue;
+      field.removeAttribute('aria-invalid');
+    });
     document.querySelector('input[name="area"][value="ftz"]').checked = true;
     document.querySelector('input[name="margin"][value="0.15"]').checked = true;
+    document.querySelector('input[name="vendorChoice"][value="emy"]').checked = true;
+    state.vendorChoice = 'emy';
+    state.otherVendor = { name: '', nib: '', npwp: '' };
+    updateVendorChoice({ preserveCurrent: false });
     $('customMargin').value = '12,5'; $('customMarginSlider').value = '12.5'; $('pkp').checked = false;
     moneyIds.forEach((id) => { $(id).value = ''; });
     $('emptyResult').hidden = false; $('resultContent').hidden = true; $('analysis').hidden = true;
     $('saveState').textContent = 'Belum disimpan';
     $('mainInputError').hidden = true; $('netVendor').closest('.money-field').classList.remove('invalid');
     setCalcStatus('incomplete', 'Belum lengkap');
-    updateModeUI(); updateMarginUI();
+    updateModeUI(); updateMarginUI(); updateExcelCompletion();
     $('projectName').focus();
     showToast('Form telah direset.');
   }
@@ -411,18 +582,36 @@
     state.result = null; state.hasCalculated = false;
     $('emptyResult').hidden = false; $('resultContent').hidden = true; $('analysis').hidden = true;
     setCalcStatus('incomplete', 'Belum lengkap');
+    updateExcelCompletion();
     $('netVendor').focus();
   }
 
-  function downloadJson() {
-    if (!state.result && !calculateAndRender({ showErrors: true })) return;
-    const payload = { exportedAt: new Date().toISOString(), appVersion: '2.0.0', scenario: buildScenario(), summary: summaryText() };
-    const name = ($('projectName').value.trim() || 'cba-posnew').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a'); anchor.href = url; anchor.download = `${name || 'cba-posnew'}-analysis.json`; anchor.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    showToast('File analisis JSON berhasil dibuat.');
+  async function downloadExcel() {
+    if (state.workflow !== 'excel') setWorkflow('excel', { scroll: true });
+    if (state.mode !== 'maju') {
+      state.mode = 'maju';
+      updateModeUI();
+    }
+    if (!calculateAndRender({ showErrors: true })) return;
+    if (!validateExcelDetails(true)) return;
+    if (!window.CBAXlsx || typeof window.CBAXlsx.downloadWorkbook !== 'function') {
+      showToast('Fitur Excel belum termuat. Muat ulang halaman lalu coba lagi.', 'error');
+      return;
+    }
+
+    const buttons = [$('downloadExcelBtn'), $('exportBtn')];
+    buttons.forEach((button) => { button.disabled = true; });
+    $('downloadExcelBtn').querySelector('span').textContent = 'Menyiapkan workbook…';
+    try {
+      await window.CBAXlsx.downloadWorkbook({ result: { ...state.result }, details: collectExcelDetails() });
+      showToast('Workbook Excel CBA berhasil dibuat.');
+    } catch (error) {
+      console.error(error);
+      showToast(error && error.message ? error.message : 'Workbook Excel gagal dibuat.', 'error');
+    } finally {
+      buttons.forEach((button) => { button.disabled = false; });
+      $('downloadExcelBtn').querySelector('span').textContent = 'Buat file Excel CBA';
+    }
   }
 
   async function copySummary() {
@@ -457,12 +646,16 @@
   });
 
   function bindEvents() {
+    document.querySelectorAll('[data-workflow]').forEach((button) => button.addEventListener('click', () => {
+      setWorkflow(button.dataset.workflow, { scroll: button.dataset.workflow === 'excel' });
+    }));
     document.querySelectorAll('[data-mode]').forEach((button) => button.addEventListener('click', () => {
       state.mode = button.dataset.mode;
       updateModeUI();
       if (state.hasCalculated) calculateAndRender();
     }));
     document.querySelectorAll('input[name="area"],input[name="margin"]').forEach((input) => input.addEventListener('change', realtime));
+    document.querySelectorAll('input[name="vendorChoice"]').forEach((input) => input.addEventListener('change', updateVendorChoice));
     $('customMargin').addEventListener('input', () => {
       const value = parseMargin($('customMargin').value);
       if (Number.isFinite(value) && value >= 10 && value <= 15) $('customMarginSlider').value = value;
@@ -484,13 +677,28 @@
       if (caretAtEnd) event.target.setSelectionRange(event.target.value.length, event.target.value.length);
       realtime();
     }));
-    ['projectName', 'analystName', 'projectNotes'].forEach((id) => $(id).addEventListener('input', () => { $('saveState').textContent = 'Perubahan belum disimpan'; }));
+    ['projectName', 'analystName', 'projectNotes'].forEach((id) => $(id).addEventListener('input', () => {
+      $('saveState').textContent = 'Perubahan belum disimpan';
+      $(id).removeAttribute('aria-invalid');
+      updateExcelCompletion();
+    }));
+    excelFieldIds.forEach((id) => {
+      const field = $(id);
+      const update = () => {
+        field.removeAttribute('aria-invalid');
+        if (id === 'startDate') $('endDate').min = field.value;
+        updateExcelCompletion();
+      };
+      field.addEventListener('input', update);
+      field.addEventListener('change', update);
+    });
     $('calculateBtn').addEventListener('click', () => calculateAndRender({ showErrors: true, scroll: true }));
     $('resetBtn').addEventListener('click', resetAll);
     $('clearValuesBtn').addEventListener('click', clearValues);
     $('saveScenarioBtn').addEventListener('click', saveScenario);
     $('copyBtn').addEventListener('click', copySummary);
-    $('exportBtn').addEventListener('click', downloadJson);
+    $('exportBtn').addEventListener('click', downloadExcel);
+    $('downloadExcelBtn').addEventListener('click', downloadExcel);
     $('printBtn').addEventListener('click', () => window.print());
     $('openScenariosBtn').addEventListener('click', () => $('scenarioDialog').showModal());
     $('scenarioList').addEventListener('click', (event) => {
@@ -508,8 +716,8 @@
   }
 
   function init() {
-    bindEvents(); updateModeUI(); updateMarginUI(); loadScenarios();
-    window.CBA = { calculatePricing, toNumber, idr, COF_RATE };
+    bindEvents(); updateVendorChoice({ preserveCurrent: false }); setWorkflow('calculate'); updateMarginUI(); loadScenarios(); updateExcelCompletion();
+    window.CBA = { calculatePricing, toNumber, idr, COF_RATE, collectExcelDetails };
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

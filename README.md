@@ -1,11 +1,13 @@
 # CBA PosNew – Pricing Calculator
 
-Aplikasi statis untuk menghitung dua jenis keputusan pricing:
+Aplikasi statis dengan dua alur kerja:
 
-1. **Hitung Penawaran** — mengubah biaya net menjadi rekomendasi penawaran minimum.
-2. **Reverse Budget** — mengubah budget customer menjadi batas maksimal pembayaran vendor.
+1. **Cek Perhitungan CBA** — menghitung penawaran atau reverse budget tanpa data dokumen.
+2. **Buat Excel CBA** — menghitung penawaran, melengkapi data proyek, lalu mengunduh workbook dengan sheet `CBA2`, `Rekap CBA 1`, `RBL`, `RBL 2`, dan `SOW Shadow`.
 
-Seluruh proses dilakukan di browser. Tidak ada backend, analytics, atau pengiriman data input ke server.
+Sheet Packing List tidak disertakan pada hasil ekspor. Vendor bawaan adalah **CV Emy Rizky Jaya** dengan NIB dan NPWP terisi otomatis; pengguna juga dapat memilih vendor lain dan mengisi legalitasnya sendiri.
+
+Seluruh perhitungan dan pembuatan workbook dilakukan di browser. Tidak ada backend, analytics, atau pengiriman data input ke server.
 
 ## Deploy ke Cloudflare Pages
 

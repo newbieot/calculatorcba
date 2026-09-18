@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.1.0 — 2026-09-18
+
+- Menambahkan pilihan alur **Cek Perhitungan CBA** dan **Buat Excel CBA**.
+- Menambahkan formulir data proyek untuk pembuatan workbook langsung di browser.
+- Menghasilkan workbook berisi `CBA2`, `Rekap CBA 1`, `RBL`, `RBL 2`, dan `SOW Shadow` tanpa sheet Packing List.
+- Mengisi formula, rincian biaya, rute, PIC, dan ruang lingkup kerja dari input pengguna.
+- Menjadikan **CV Emy Rizky Jaya** sebagai vendor bawaan dengan NIB dan NPWP otomatis.
+- Menambahkan opsi vendor lain dengan nama, NIB, dan NPWP yang dapat diisi manual.
+
 ## 2.0.0 — 2026-07-28
 
 - Redesign total UI menjadi workspace pricing dua kolom yang responsif.

@@ -22,6 +22,15 @@
 
 Tidak ada formula bisnis lama yang diubah. Fungsi perhitungan dipisahkan menjadi fungsi murni `calculatePricing()` agar dapat diuji. Nilai internal tetap menggunakan presisi penuh dan pembulatan hanya dilakukan pada tampilan.
 
+## Ekspor workbook
+
+- Workbook dibuat sepenuhnya di browser dari template referensi.
+- Hasil berisi tepat lima sheet: `CBA2`, `Rekap CBA 1`, `RBL`, `RBL 2`, dan `SOW Shadow`.
+- Sheet Packing List dan referensinya dihapus.
+- Formula kalkulasi tetap disimpan pada workbook dan ditandai untuk kalkulasi ulang saat dibuka.
+- CV Emy Rizky Jaya mengisi nama, NIB, dan NPWP secara otomatis dalam kolom terkunci.
+- Opsi vendor lain mewajibkan nama, NIB, dan NPWP sebelum workbook dapat dibuat.
+
 ## Bug dan risiko yang diperbaiki
 
 - Browser alert diganti validasi inline.
@@ -73,3 +82,10 @@ Ekspektasi:
 - [x] Desktop dan mobile tidak horizontal overflow.
 - [x] Footer mengikuti struktur/style referensi.
 - [x] Asset path dan ZIP root benar.
+- [x] Menu cek perhitungan tidak mewajibkan data dokumen.
+- [x] Menu Excel hanya memakai alur Hitung Penawaran.
+- [x] Workbook hasil mempunyai lima sheet yang diminta dan tanpa Packing List.
+- [x] Workbook hasil dapat dibuka kembali dan tidak mempunyai formula error.
+- [x] Vendor Emy mengisi nama, NIB, dan NPWP otomatis sebagai data terkunci.
+- [x] Vendor lain membuka nama, NIB, dan NPWP sebagai data wajib yang dapat diedit.
+- [x] Perpindahan vendor tidak menghapus data vendor lain selama sesi form.

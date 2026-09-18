@@ -19,7 +19,7 @@
   <link rel="icon" href="favicon-calculatorcba.png" type="image/png">
   <link rel="apple-touch-icon" href="favicon-calculatorcba.png">
   <link rel="manifest" href="site.webmanifest">
-  <link rel="stylesheet" href="assets/css/app.css?v=20260909-2">
+  <link rel="stylesheet" href="assets/css/app.css?v=20260918-2">
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -59,7 +59,7 @@
       <div class="hero-copy">
         <span class="eyebrow">Strategic Corporate Sales Support</span>
         <h1 id="pageTitle">Tentukan harga dengan dasar biaya yang jelas.</h1>
-        <p>Hitung penawaran minimum atau balikkan budget customer menjadi batas aman pembayaran vendor—tanpa spreadsheet dan tanpa mengirim data ke server.</p>
+        <p>Hitung penawaran minimum atau balikkan budget customer menjadi batas aman pembayaran vendor—langsung di browser dan tanpa mengirim data ke server.</p>
         <div class="hero-badges" aria-label="Keunggulan aplikasi">
           <span>Formula transparan</span><span>Realtime</span><span>Siap cetak</span>
         </div>
@@ -74,18 +74,36 @@
       </div>
     </section>
 
+    <section class="workflow-picker" aria-labelledby="workflowTitle">
+      <div class="workflow-heading">
+        <span class="section-kicker">Pilih kebutuhan</span>
+        <h2 id="workflowTitle">Mau cek angka saja atau langsung siapkan dokumen?</h2>
+      </div>
+      <div class="workflow-options" role="tablist" aria-label="Pilihan alur kerja">
+        <button id="workflowCalculate" class="workflow-card active" type="button" role="tab" aria-selected="true" data-workflow="calculate">
+          <span class="workflow-number">1</span>
+          <span><strong>Cek Perhitungan CBA</strong><small>Hitung penawaran atau reverse budget tanpa mengisi data dokumen.</small></span>
+        </button>
+        <button id="workflowExcel" class="workflow-card" type="button" role="tab" aria-selected="false" data-workflow="excel">
+          <span class="workflow-number">2</span>
+          <span><strong>Buat Excel CBA</strong><small>Hitung penawaran, lengkapi data proyek, lalu unduh workbook siap pakai.</small></span>
+        </button>
+      </div>
+    </section>
+
     <nav class="step-nav" aria-label="Navigasi bagian">
       <a href="#project"><span>1</span>Informasi</a>
       <a href="#inputs"><span>2</span>Biaya & Asumsi</a>
       <a href="#resultsPanel"><span>3</span>Hasil</a>
-      <a href="#analysis"><span>4</span>Analisis</a>
+      <a id="excelNavLink" href="#excelDetails" hidden><span>4</span>Data Excel</a>
+      <a href="#analysis"><span id="analysisStepNumber">4</span>Analisis</a>
     </nav>
 
     <section id="workspace" class="workspace" aria-label="Workspace kalkulator">
       <div class="input-column">
         <section id="project" class="panel project-panel">
           <div class="panel-heading">
-            <div><span class="section-kicker">Informasi analisis</span><h2>Identitas skenario</h2></div>
+            <div><span id="projectSectionKicker" class="section-kicker">Informasi analisis</span><h2 id="projectSectionTitle">Identitas skenario</h2></div>
             <span id="saveState" class="save-state">Belum disimpan</span>
           </div>
           <div class="field-grid two">
@@ -111,6 +129,7 @@
               <span><strong>Reverse Budget</strong><small>Dari budget ke batas vendor</small></span>
             </button>
           </div>
+          <p id="excelModeNote" class="excel-mode-note" hidden>Workbook CBA menggunakan alur <strong>Hitung Penawaran</strong>. Reverse Budget tetap tersedia pada menu cek perhitungan.</p>
 
           <div class="assumption-grid">
             <fieldset class="choice-group">
@@ -178,6 +197,77 @@
             <button id="resetBtn" class="secondary-button" type="button">Reset</button>
           </div>
         </section>
+
+        <section id="excelDetails" class="panel excel-details" hidden>
+          <div class="panel-heading">
+            <div><span class="section-kicker">Data workbook</span><h2>Lengkapi dokumen CBA</h2></div>
+            <span id="excelCompletion" class="calc-status incomplete"><span></span>0% lengkap</span>
+          </div>
+          <p class="panel-intro excel-intro">Data berikut dipakai untuk mengisi sheet CBA2, Rekap CBA 1, RBL, RBL 2, dan SOW Shadow. Sheet Packing List tidak akan dibuat.</p>
+
+          <fieldset class="excel-fieldset">
+            <legend>Identitas proyek</legend>
+            <div class="field-grid two">
+              <label class="field"><span>ID proyek <b>*</b></span><input id="projectId" type="text" maxlength="40" placeholder="Contoh: CB2940026023" data-excel-required></label>
+              <label class="field"><span>Nama pelanggan <b>*</b></span><input id="customerName" type="text" maxlength="100" placeholder="Nama perusahaan / pelanggan" data-excel-required></label>
+              <label class="field"><span>Jenis kiriman / komoditi <b>*</b></span><input id="commodity" type="text" maxlength="100" value="Barang Pindah" data-excel-required></label>
+              <label class="field"><span>Jenis layanan <b>*</b></span><input id="serviceType" type="text" maxlength="80" value="FREIGHT FORWARDING" data-excel-required></label>
+              <label class="field"><span>Alat transportasi <b>*</b></span><input id="transportMode" type="text" maxlength="60" value="Darat" data-excel-required></label>
+              <label class="field"><span>Termin pembayaran <b>*</b></span><input id="paymentTerm" type="text" maxlength="100" value="Per SPK 30 Hari" data-excel-required></label>
+              <label class="field"><span>Tanggal mulai <b>*</b></span><input id="startDate" type="date" data-excel-required></label>
+              <label class="field"><span>Tanggal selesai <b>*</b></span><input id="endDate" type="date" data-excel-required></label>
+              <label class="field"><span>Berat total (kg) <b>*</b></span><input id="shipmentWeight" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0" data-excel-required></label>
+              <label class="field"><span>Jumlah koli <b>*</b></span><input id="packageCount" type="number" min="1" step="1" inputmode="numeric" placeholder="0" data-excel-required></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="excel-fieldset">
+            <legend>Rute dan PIC</legend>
+            <div class="field-grid two">
+              <label class="field"><span>Kota asal <b>*</b></span><input id="originCity" type="text" maxlength="80" value="Batam" data-excel-required></label>
+              <label class="field"><span>Kota tujuan <b>*</b></span><input id="destinationCity" type="text" maxlength="80" placeholder="Contoh: Tangerang" data-excel-required></label>
+              <label class="field span-two"><span>Alamat penjemputan <b>*</b></span><textarea id="originAddress" rows="2" maxlength="300" placeholder="Alamat lengkap origin" data-excel-required></textarea></label>
+              <label class="field span-two"><span>Alamat tujuan <b>*</b></span><textarea id="destinationAddress" rows="2" maxlength="300" placeholder="Alamat lengkap destination" data-excel-required></textarea></label>
+              <label class="field"><span>Nama PIC pelanggan <b>*</b></span><input id="customerPic" type="text" maxlength="80" placeholder="Nama PIC" data-excel-required></label>
+              <label class="field"><span>No. telepon / HP <b>*</b></span><input id="customerPhone" type="tel" maxlength="40" placeholder="08..." data-excel-required></label>
+              <label class="field"><span>Email <em>opsional</em></span><input id="customerEmail" type="email" maxlength="120" placeholder="nama@perusahaan.com"></label>
+              <label class="field"><span>PIC internal / jabatan / CP <b>*</b></span><input id="internalPic" type="text" maxlength="120" value="RIKY JULIADI / AM PENJUALAN" data-excel-required></label>
+              <label class="field span-two"><span>Alamat pelanggan <b>*</b></span><textarea id="customerAddress" rows="2" maxlength="300" placeholder="Alamat pelanggan" data-excel-required></textarea></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="excel-fieldset">
+            <legend>Operasional dan vendor</legend>
+            <div class="field-grid two">
+              <label class="field"><span>Lokasi proyek <b>*</b></span><input id="projectLocation" type="text" maxlength="100" placeholder="Contoh: BATAM - TANGERANG" data-excel-required></label>
+              <label class="field"><span>Pola operasi <b>*</b></span><input id="operationPattern" type="text" maxlength="80" value="Door to Door" data-excel-required></label>
+              <label class="field"><span>Jenis kendaraan <b>*</b></span><input id="vehicleType" type="text" maxlength="60" value="CDD" data-excel-required></label>
+              <label class="field"><span>Estimasi perjalanan <b>*</b></span><input id="estimatedTrip" type="text" maxlength="60" value="14 Hari" data-excel-required></label>
+              <label class="field"><span>Jenis kargo <b>*</b></span><input id="cargoType" type="text" maxlength="100" value="General Cargo" data-excel-required></label>
+              <label class="field"><span>Bentuk kiriman <b>*</b></span><input id="shipmentForm" type="text" maxlength="100" value="Kiriman Barang Pindahan" data-excel-required></label>
+              <label class="field"><span>Tujuan proyek <b>*</b></span><input id="projectPurpose" type="text" maxlength="100" value="Barang Pindahan" data-excel-required></label>
+              <label class="field"><span>Dimensi per koli <em>opsional</em></span><input id="packageDimensions" type="text" maxlength="80" placeholder="Contoh: P60 × L50 × T50 cm"></label>
+              <fieldset class="choice-group vendor-choice span-two">
+                <legend>Pilih vendor</legend>
+                <div class="segmented">
+                  <label><input type="radio" name="vendorChoice" value="emy" checked><span>CV Emy Rizky Jaya<small>Data legalitas terisi otomatis</small></span></label>
+                  <label><input type="radio" name="vendorChoice" value="other"><span>Vendor lain<small>Isi nama, NIB, dan NPWP</small></span></label>
+                </div>
+              </fieldset>
+              <label class="field"><span>Nama vendor <b>*</b></span><input id="vendorName" type="text" maxlength="100" value="CV EMY RIZKY JAYA" readonly data-excel-required></label>
+              <label class="field"><span>NIB vendor <b>*</b></span><input id="vendorNib" type="text" maxlength="40" value="9120401921208" readonly></label>
+              <label class="field"><span>NPWP vendor <b>*</b></span><input id="vendorNpwp" type="text" maxlength="40" value="92.813.868.4-215.000" readonly></label>
+              <label class="field"><span>Frekuensi pelaksanaan <b>*</b></span><input id="executionFrequency" type="text" maxlength="80" value="Sekali dalam Masa Proyek" data-excel-required></label>
+              <label class="field span-two"><span>Penjelasan pola operasi <b>*</b></span><textarea id="operationDescription" rows="5" maxlength="3000" placeholder="Jelaskan alur pickup, proses, perjalanan, dan serah terima." data-excel-required></textarea></label>
+            </div>
+          </fieldset>
+
+          <div id="excelValidationSummary" class="excel-validation" role="status">Lengkapi data bertanda * dan jalankan perhitungan untuk membuat workbook.</div>
+          <button id="downloadExcelBtn" class="primary-button excel-download" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+            <span>Buat file Excel CBA</span>
+          </button>
+        </section>
       </div>
 
       <aside id="resultsPanel" class="result-column" aria-label="Hasil kalkulasi">
@@ -206,7 +296,7 @@
             <div class="result-actions">
               <button id="saveScenarioBtn" type="button"><svg viewBox="0 0 24 24"><path d="M5 3h12l2 2v16H5V3Z"/><path d="M8 3v6h8V3M8 15h8"/></svg>Simpan</button>
               <button id="copyBtn" type="button"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Salin</button>
-              <button id="exportBtn" type="button"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Ekspor</button>
+              <button id="exportBtn" type="button" hidden><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Buat Excel</button>
               <button id="printBtn" type="button"><svg viewBox="0 0 24 24"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/></svg>Cetak</button>
             </div>
           </div>
@@ -284,6 +374,7 @@
   </footer>
 
   <noscript><div class="noscript">JavaScript harus diaktifkan untuk menggunakan kalkulator ini.</div></noscript>
-  <script src="assets/js/app.js?v=20260909-2" defer></script>
+  <script src="assets/js/xlsx-export.js?v=20260918-2" defer></script>
+  <script src="assets/js/app.js?v=20260918-2" defer></script>
 </body>
 </html>

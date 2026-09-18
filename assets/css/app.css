@@ -20,3 +20,44 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 /* Custom margin is an editable field, unlike the hidden radio inputs above. */
 .custom-margin{width:min(100%,220px);margin-top:.55rem}.custom-margin input{width:100%;min-width:0}.margin-slider{display:grid;gap:.28rem;margin-top:.7rem;padding:.7rem .8rem;border:1px solid var(--line);border-radius:10px;background:#f8fafc}.margin-slider label{display:flex;align-items:center;justify-content:space-between;color:#536076;font-size:.68rem;font-weight:750}.margin-slider output{color:var(--navy-900);font-variant-numeric:tabular-nums}.margin-slider input{width:100%;accent-color:var(--navy-800);cursor:pointer}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* Workflow selection and Excel CBA form */
+[hidden]{display:none!important}
+.workflow-picker{width:min(1180px,calc(100% - 32px));margin:0 auto 18px;padding:1rem 1.1rem;display:grid;grid-template-columns:minmax(220px,.7fr) minmax(0,1.8fr);gap:1rem;align-items:center;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:var(--shadow)}
+.workflow-heading h2{margin:.24rem 0 0;color:var(--navy-950);font-size:1rem;line-height:1.3;letter-spacing:-.015em}
+.workflow-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
+.workflow-card{min-height:78px;padding:.78rem;display:grid;grid-template-columns:34px 1fr;gap:.65rem;align-items:center;border:1px solid var(--line);border-radius:13px;background:#f8fafc;color:#556278;text-align:left;cursor:pointer}
+.workflow-card:hover{border-color:#aebbd0;background:#fff}
+.workflow-card.active{border-color:var(--navy-700);background:#edf3fb;color:var(--navy-950);box-shadow:inset 0 0 0 1px var(--navy-700)}
+.workflow-card[data-workflow="excel"].active{border-color:var(--orange);background:var(--orange-soft);box-shadow:inset 0 0 0 1px var(--orange)}
+.workflow-number{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#fff;color:var(--navy-900);font-size:.78rem;font-weight:850;box-shadow:0 2px 8px rgba(15,23,42,.08)}
+.workflow-card[data-workflow="excel"].active .workflow-number{background:var(--orange);color:#fff}
+.workflow-card strong,.workflow-card small{display:block}.workflow-card strong{font-size:.76rem}.workflow-card small{margin-top:.18rem;color:#7d899b;font-size:.63rem;line-height:1.35}
+.step-nav.excel-workflow{grid-template-columns:repeat(5,minmax(0,1fr))}
+.mode-switch.single{grid-template-columns:1fr}
+.excel-mode-note{margin:-.45rem 0 1rem;padding:.72rem .8rem;border:1px solid #f2c9bf;border-radius:11px;background:#fff7f4;color:#784237;font-size:.69rem}
+.excel-details{border-top:3px solid var(--orange)}
+.excel-intro{margin:.2rem 0 1rem}
+.excel-fieldset{min-width:0;margin:0 0 1rem;padding:1rem;border:1px solid var(--line);border-radius:15px;background:#fbfcfe}
+.excel-fieldset legend{padding:0 .45rem;color:var(--navy-900);font-size:.76rem;font-weight:850}
+.excel-fieldset .field-grid{gap:.85rem}
+.field.span-two{grid-column:1/-1}
+.excel-fieldset .field b{color:var(--orange)}
+.vendor-choice{margin:0;padding:0;border:0;background:transparent}
+.vendor-choice>legend{margin-bottom:.45rem;padding:0;color:#43516a;font-size:.68rem;font-weight:750}
+.vendor-choice .segmented span{min-height:54px;text-align:left}
+.excel-fieldset .field.auto-filled input[readonly]{border-color:#c5d3e6;background:#edf3fb;color:var(--navy-900);cursor:not-allowed}
+.excel-fieldset .field.auto-filled>span::after{content:'Otomatis';margin-left:.45rem;padding:.16rem .38rem;border-radius:999px;background:#e2ebf7;color:#36537e;font-size:.56rem;font-weight:800;vertical-align:middle}
+.excel-fieldset input[aria-invalid="true"],.excel-fieldset textarea[aria-invalid="true"],.project-panel input[aria-invalid="true"]{border-color:#d9695d;background:#fff7f6;box-shadow:0 0 0 3px rgba(173,45,34,.08)}
+.excel-validation{margin:.2rem 0 .8rem;padding:.72rem .8rem;border-radius:11px;background:var(--warning-bg);color:var(--warning);font-size:.7rem;font-weight:700}
+.excel-validation.ready{background:var(--success-bg);color:var(--success)}
+.excel-validation.error{background:var(--danger-bg);color:var(--danger)}
+.excel-download{width:100%}
+.excel-download[disabled]{cursor:wait;opacity:.7;transform:none}
+.result-actions:has(#exportBtn[hidden]){grid-template-columns:repeat(3,1fr)}
+body.excel-workflow-active .result-shell{background:linear-gradient(160deg,#172554,#4c2430)}
+
+@media (max-width:960px){.workflow-picker{grid-template-columns:1fr}.workflow-heading{text-align:center}.workflow-options{max-width:760px;width:100%;margin:auto}}
+@media (max-width:700px){.workflow-picker{width:calc(100% - 20px);padding:.8rem}.workflow-options{grid-template-columns:1fr}.workflow-card{min-height:70px}.step-nav.excel-workflow{grid-template-columns:repeat(5,minmax(50px,1fr))}.excel-fieldset{padding:.8rem}.field.span-two{grid-column:auto}}
+@media (max-width:430px){.workflow-heading h2{font-size:.9rem}.workflow-card{grid-template-columns:30px 1fr}.workflow-number{width:30px;height:30px}.step-nav.excel-workflow a{font-size:0}.step-nav.excel-workflow a span{font-size:.66rem}}
+@media print{.workflow-picker,.excel-details{display:none!important}}
