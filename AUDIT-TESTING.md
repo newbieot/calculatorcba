@@ -92,3 +92,9 @@ Ekspektasi:
 - [x] Reverse budget otomatis dikonversi ke nilai net vendor maju saat beralih ke formulir Excel.
 - [x] Tombol dan card aksi beralih alur membawa seluruh angka tanpa perlu input ulang.
 - [x] Banner data terintegrasi muncul di formulir Excel untuk konfirmasi visual.
+- [x] Narasi pola operasi standar terisi otomatis sejak awal tanpa mengharuskan pengguna mengetik manual.
+- [x] Narasi operasional tersinkronisasi dinamis saat data pelanggan, rute, atau komoditas diubah.
+- [x] Tombol perbarui narasi otomatis tersedia untuk mengembalikan teks standar jika diinginkan.
+- [x] Gambar diagram alur operasional 6 langkah digenerate secara otomatis via HTML5 Canvas resolusi tinggi (1874×1048 px).
+- [x] Diagram otomatis disematkan dan menggantikan image3.png di sheet SOW Shadow pada file Excel hasil unduhan.
+- [x] Preview diagram, unduh PNG, dan opsi unggah gambar diagram kustom berfungsi dengan baik.

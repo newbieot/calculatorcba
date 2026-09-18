@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.3.0 — 2026-09-18
+
+- Menambahkan generator gambar diagram pola operasi otomatis untuk sheet **SOW Shadow** (`xl/media/image3.png`) berbasis HTML5 Canvas beresolusi tinggi (1874×1048 px) dengan rasio presisi 1.788.
+- Diagram memvisualisasikan alur 6 langkah standar operasional (Pickup, Standarisasi Keamanan, PPFTZ01 Bea Cukai, Penyeberangan RoRo, Mobilisasi Darat, dan Delivery/Bongkar) yang sinkron otomatis dengan rute, armada, dan PIC pelanggan.
+- Menambahkan preview interaktif gambar pola operasi langsung pada antarmuka web dengan opsi unduh PNG dan unggah gambar kustom.
+- Menyediakan narasi default pola operasi standar pada kolom `operationDescription` yang terisi otomatis dan sinkron dengan identitas proyek sehingga pengguna tidak perlu mengisi teks narasi secara manual.
+- Menambahkan tombol "Perbarui Narasi Otomatis" untuk mengembalikan narasi standar kapan saja.
+
 ## 2.2.0 — 2026-09-18
 
 - Menghubungkan alur **Cek Perhitungan CBA** langsung ke **Buat Excel CBA** saat pengguna merasa hasil perhitungan sudah cocok.

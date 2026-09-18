@@ -19,7 +19,7 @@
   <link rel="icon" href="favicon-calculatorcba.png" type="image/png">
   <link rel="apple-touch-icon" href="favicon-calculatorcba.png">
   <link rel="manifest" href="site.webmanifest">
-  <link rel="stylesheet" href="assets/css/app.css?v=20260918-4">
+  <link rel="stylesheet" href="assets/css/app.css?v=20260918-5">
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -260,7 +260,55 @@
               <label class="field"><span>NIB vendor <b>*</b></span><input id="vendorNib" type="text" maxlength="40" value="9120401921208" readonly></label>
               <label class="field"><span>NPWP vendor <b>*</b></span><input id="vendorNpwp" type="text" maxlength="40" value="92.813.868.4-215.000" readonly></label>
               <label class="field"><span>Frekuensi pelaksanaan <b>*</b></span><input id="executionFrequency" type="text" maxlength="80" value="Sekali dalam Masa Proyek" data-excel-required></label>
-              <label class="field span-two"><span>Penjelasan pola operasi <b>*</b></span><textarea id="operationDescription" rows="5" maxlength="3000" placeholder="Jelaskan alur pickup, proses, perjalanan, dan serah terima." data-excel-required></textarea></label>
+              <div class="field span-two">
+                <div class="field-label-row">
+                  <span>Penjelasan pola operasi <b>*</b></span>
+                  <button id="resetNarrativeBtn" class="text-button" type="button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 0 0 4.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 0 1-15.357-2m15.357 2H15"/></svg>
+                    Perbarui Narasi Otomatis
+                  </button>
+                </div>
+                <textarea id="operationDescription" rows="7" maxlength="4000" placeholder="Jelaskan alur pickup, proses, perjalanan, dan serah terima." data-excel-required>Operasional pengiriman barang pindah Bapak Lukmanur ini dijalankan dengan skema Door-to-Door menggunakan moda transportasi darat dan penyeberangan (RoRo) dengan sistem multi-drop. Tahap awal dimulai dengan penjemputan (pickup) seluruh muatan di Rumah Bapak Lukmanur di Sukajadi Batam. Barang kemudian dimobilisasi menuju Kantor Pos Batam untuk melalui proses standarisasi keamanan, meliputi pembuatan packing bubble wrap dan wrapping plastic, wrapping menyeluruh, serta validasi final terhadap Packing List untuk memastikan kesesuaian data.
+
+Fase krusial selanjutnya adalah penyelesaian administrasi kepabeanan (PPFTZ01) sesuai regulasi Free Trade Zone. Proses dimulai dengan input data manifest melalui sistem Ion Beta, yang dilanjutkan dengan sesi wawancara pemilik barang di Kantor Bea Cukai Batu Ampar. Setelah itu, dilakukan pemeriksaan fisik barang secara mendetail di Tempat Penimbunan Sementara (TPS) Pos Batam. Apabila hasil pemeriksaan fisik dan dokumen dinyatakan sesuai dalam Berita Acara, Bea Cukai akan menerbitkan Surat Persetujuan Pengeluaran Barang (SPPB). Sebagai langkah pengamanan terakhir di Batam, truk akan disegel (seal) dan ditempel stiker pengaman resmi oleh petugas Bea Cukai sebelum meninggalkan area TPS.
+
+Pada tahap mobilisasi, armada bergerak menuju Pelabuhan Punggur. Di lokasi ini, segel dan stiker pengaman akan dilepas oleh petugas Bea Cukai setempat sebagai prosedur standar sebelum truk menyeberang menuju Pelabuhan Tanjung Buton. Perjalanan darat kemudian dilanjutkan menuju Tangerang. Setibanya di Tangerang, kiriman dilakukan pengantaran dan bongkar kiriman di rumah Bapak Lukmanur Jl. Merak Raya No 173 RT 02 RW 012 Kel. Cibodasari Kecamatan Cibodas, Perumnas 1, Kota Tangerang. 15138</textarea>
+                <small class="helper">Narasi standar terisi otomatis dan sinkron dengan nama pelanggan, alamat jemput, dan alamat tujuan.</small>
+              </div>
+
+              <div class="field span-two diagram-section">
+                <div class="diagram-header">
+                  <div>
+                    <span class="diagram-title">Gambar Pola Operasi (Sheet SOW Shadow)</span>
+                    <small class="helper">Diagram alur operasional otomatis dibuat dan disematkan langsung ke sheet SOW Shadow di file Excel.</small>
+                  </div>
+                  <div class="diagram-header-actions">
+                    <button id="regenerateDiagramBtn" class="text-button" type="button">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 0 0 4.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 0 1-15.357-2m15.357 2H15"/></svg>
+                      Perbarui Diagram
+                    </button>
+                    <button id="downloadDiagramBtn" class="text-button" type="button">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+                      Unduh PNG
+                    </button>
+                  </div>
+                </div>
+                <div class="diagram-preview-container">
+                  <div class="diagram-img-wrap">
+                    <img id="diagramPreviewImg" alt="Preview Diagram Pola Operasi SOW Shadow" class="diagram-preview-img">
+                  </div>
+                  <div class="diagram-footer-bar">
+                    <span id="diagramStatus" class="diagram-status"><span class="status-dot"></span>Otomatis sinkron dengan rute & identitas proyek</span>
+                    <div class="diagram-upload-wrap">
+                      <label class="upload-btn-label">
+                        <input id="customDiagramInput" type="file" accept="image/png,image/jpeg" hidden>
+                        <span>Ganti gambar sendiri (opsional)</span>
+                      </label>
+                      <button id="resetDiagramBtn" class="text-button" type="button" hidden>Gunakan Diagram Otomatis</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </fieldset>
 
@@ -374,7 +422,7 @@
   </footer>
 
   <noscript><div class="noscript">JavaScript harus diaktifkan untuk menggunakan kalkulator ini.</div></noscript>
-  <script src="assets/js/xlsx-export.js?v=20260918-2" defer></script>
-  <script src="assets/js/app.js?v=20260918-4" defer></script>
+  <script src="assets/js/xlsx-export.js?v=20260918-5" defer></script>
+  <script src="assets/js/app.js?v=20260918-5" defer></script>
 </body>
 </html>

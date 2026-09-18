@@ -87,5 +87,28 @@ body.excel-workflow-active .result-shell{background:linear-gradient(160deg,#1725
 .integration-notice-header strong{font-size:.78rem;color:#172554;font-weight:800}
 .integration-notice-chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.4rem}
 .integration-chip{display:inline-flex;align-items:center;gap:.3rem;padding:.22rem .55rem;border-radius:7px;background:#fff;border:1px solid #c7d8ed;color:#3b5175;font-size:.67rem}
-.integration-chip strong{color:#0f172a}
 .integration-notice-note{display:block;margin-top:.4rem;color:#4b648b;font-size:.65rem;line-height:1.35}
+
+/* Operation Narrative & Diagram in SOW */
+.field-label-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.diagram-section{margin-top:.6rem;padding:1rem;border:1px solid #cbd5e1;border-radius:15px;background:#f8fafc}
+.diagram-header{display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem;margin-bottom:.75rem}
+.diagram-title{display:block;color:var(--navy-950);font-size:.82rem;font-weight:800}
+.diagram-header-actions{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.diagram-preview-container{display:grid;gap:.6rem}
+.diagram-img-wrap{width:100%;max-height:440px;overflow:hidden;border:1px solid #cbd5e1;border-radius:12px;background:#fff;box-shadow:0 6px 18px rgba(15,23,42,.06);display:grid;place-items:center}
+.diagram-preview-img{width:100%;height:auto;max-height:440px;object-fit:contain;display:block}
+.diagram-footer-bar{display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;font-size:.7rem}
+.diagram-status{display:inline-flex;align-items:center;gap:.4rem;color:#166534;font-weight:700}
+.diagram-upload-wrap{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.upload-btn-label{cursor:pointer;color:var(--navy-800);text-decoration:underline;font-size:.69rem;font-weight:700}
+.upload-btn-label:hover{color:var(--orange)}
+
+@media (max-width:700px){
+  .diagram-header{flex-direction:column;align-items:flex-start}
+  .diagram-footer-bar{flex-direction:column;align-items:flex-start;gap:.5rem}
+  .diagram-img-wrap{max-height:280px}
+}
+@media print{
+  .diagram-section{display:none!important}
+}

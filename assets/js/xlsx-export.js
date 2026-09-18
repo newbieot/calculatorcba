@@ -560,6 +560,14 @@
     writeText(archive, 'xl/worksheets/sheet5.xml', updateRbl2Sheet(await readText(archive, 'xl/worksheets/sheet5.xml'), payload));
     writeText(archive, 'xl/worksheets/sheet6.xml', updateSowSheet(await readText(archive, 'xl/worksheets/sheet6.xml'), payload));
 
+    const diagramPng = payload.diagramBytes || (await generateDiagramPngBytes(payload.details));
+    if (diagramPng && diagramPng.length > 0) {
+      const imgEntry = archive.entries.find((entry) => entry.name === 'xl/media/image3.png');
+      if (imgEntry) {
+        imgEntry.replacement = diagramPng instanceof Uint8Array ? diagramPng : new Uint8Array(diagramPng);
+      }
+    }
+
     const sowRels = 'xl/worksheets/_rels/sheet6.xml.rels';
     if (archive.entries.some((entry) => entry.name === sowRels)) {
       const emailTarget = payload.details.customerEmail ? `mailto:${escapeXml(payload.details.customerEmail)}` : 'mailto:';
@@ -579,6 +587,345 @@
       .slice(0, 80);
   }
 
+  function drawOperationDiagram(canvas, details = {}) {
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width;
+    const H = canvas.height;
+    const scale = W / 1874;
+
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, '#f8fafc');
+    bgGrad.addColorStop(0.5, '#f0f5fb');
+    bgGrad.addColorStop(1, '#e9f1f9');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = 'rgba(200, 215, 235, 0.45)';
+    ctx.lineWidth = 1;
+    for (let x = 40 * scale; x < W; x += 60 * scale) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = 40 * scale; y < H; y += 60 * scale) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+
+    const customer = details.customerName || details.customerPic || 'Bapak Lukmanur';
+    const commodity = details.commodity || 'Barang Pindah';
+    const origin = details.originCity || 'Batam';
+    const destination = details.destinationCity || 'Tangerang';
+    const originAddress = details.originAddress || `Sukajadi, ${origin}`;
+    const destAddress = details.destinationAddress || `Jl. Merak Raya No 173, ${destination}`;
+    const pattern = details.operationPattern || 'Door to Door';
+    const vehicle = details.vehicleType || 'CDD';
+    const transport = details.transportMode || 'Darat';
+    const tripTime = details.estimatedTrip || '14 Hari';
+
+    // Header Banner
+    const bannerX = 40 * scale;
+    const bannerY = 24 * scale;
+    const bannerW = W - 80 * scale;
+    const bannerH = 94 * scale;
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(15, 23, 42, 0.25)';
+    ctx.shadowBlur = 18 * scale;
+    ctx.shadowOffsetY = 8 * scale;
+
+    const headerGrad = ctx.createLinearGradient(bannerX, bannerY, bannerX + bannerW, bannerY + bannerH);
+    headerGrad.addColorStop(0, '#102a5c');
+    headerGrad.addColorStop(0.5, '#1e3a8a');
+    headerGrad.addColorStop(1, '#0f172a');
+    ctx.fillStyle = headerGrad;
+
+    if (ctx.roundRect) {
+      ctx.beginPath();
+      ctx.roundRect(bannerX, bannerY, bannerW, bannerH, 22 * scale);
+      ctx.fill();
+    } else {
+      ctx.fillRect(bannerX, bannerY, bannerW, bannerH);
+    }
+    ctx.restore();
+
+    // Title
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = 'bold ' + Math.round(26 * scale) + 'px "Segoe UI", Inter, Roboto, sans-serif';
+    const titleText = `POLA OPERASI PENGIRIMAN ${commodity.toUpperCase()} (${customer.toUpperCase()}) - ${origin.toUpperCase()} KE ${destination.toUpperCase()}`;
+    ctx.fillText(titleText, W / 2, bannerY + 34 * scale);
+
+    // Subtitle capsule
+    const subpillW = Math.min(bannerW - 60 * scale, 1280 * scale);
+    const subpillH = 32 * scale;
+    const subpillX = (W - subpillW) / 2;
+    const subpillY = bannerY + bannerH - 40 * scale;
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.16)';
+    if (ctx.roundRect) {
+      ctx.beginPath();
+      ctx.roundRect(subpillX, subpillY, subpillW, subpillH, 16 * scale);
+      ctx.fill();
+    } else {
+      ctx.fillRect(subpillX, subpillY, subpillW, subpillH);
+    }
+
+    ctx.fillStyle = '#bfdbfe';
+    ctx.font = '700 ' + Math.round(15 * scale) + 'px "Segoe UI", Inter, Roboto, sans-serif';
+    const subText = `SKEMA: ${pattern.toUpperCase()}  |  ARMADA: ${vehicle.toUpperCase()}  |  MODA: ${transport.toUpperCase()} & PENYEBERANGAN RORO  |  ESTIMASI: ${tripTime.toUpperCase()}`;
+    ctx.fillText(subText, W / 2, subpillY + subpillH / 2);
+
+    function drawCard(x, y, w, h, stepNum, title, lines, options = {}) {
+      ctx.save();
+      ctx.shadowColor = 'rgba(15, 30, 60, 0.08)';
+      ctx.shadowBlur = 14 * scale;
+      ctx.shadowOffsetY = 6 * scale;
+
+      ctx.fillStyle = options.bg || '#ffffff';
+      if (ctx.roundRect) {
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, 18 * scale);
+        ctx.fill();
+      } else {
+        ctx.fillRect(x, y, w, h);
+      }
+      ctx.restore();
+
+      ctx.strokeStyle = options.borderColor || '#d5e0ee';
+      ctx.lineWidth = 1.5 * scale;
+      if (ctx.roundRect) {
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, 18 * scale);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = options.accentColor || '#ef4123';
+      if (ctx.roundRect) {
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, 6 * scale, [18 * scale, 18 * scale, 0, 0]);
+        ctx.fill();
+      } else {
+        ctx.fillRect(x, y, w, 6 * scale);
+      }
+
+      const badgeR = 18 * scale;
+      const badgeX = x + 30 * scale;
+      const badgeY = y + 36 * scale;
+
+      ctx.beginPath();
+      ctx.arc(badgeX, badgeY, badgeR, 0, Math.PI * 2);
+      ctx.fillStyle = options.badgeBg || '#ef4123';
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = 'bold ' + Math.round(18 * scale) + 'px "Segoe UI", sans-serif';
+      ctx.fillText(String(stepNum), badgeX, badgeY);
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold ' + Math.round(17 * scale) + 'px "Segoe UI", sans-serif';
+      ctx.fillText(title, badgeX + badgeR + 12 * scale, badgeY);
+
+      let lineY = y + 74 * scale;
+      lines.forEach((line) => {
+        if (line.bold) {
+          ctx.fillStyle = line.color || '#1e3a8a';
+          ctx.font = 'bold ' + Math.round(15 * scale) + 'px "Segoe UI", sans-serif';
+        } else {
+          ctx.fillStyle = line.color || '#475569';
+          ctx.font = Math.round(14 * scale) + 'px "Segoe UI", sans-serif';
+        }
+        let text = line.text;
+        const maxTextW = w - 40 * scale;
+        while (ctx.measureText(text).width > maxTextW && text.length > 3) {
+          text = text.slice(0, -4) + '...';
+        }
+        ctx.fillText(text, x + 20 * scale, lineY);
+        lineY += 23 * scale;
+      });
+
+      if (options.iconType) {
+        drawStepIcon(ctx, x + w - 55 * scale, y + 42 * scale, 28 * scale, options.iconType);
+      }
+    }
+
+    function drawStepIcon(ctx, cx, cy, size, type) {
+      ctx.save();
+      ctx.strokeStyle = '#2563eb';
+      ctx.fillStyle = '#eff6ff';
+      ctx.lineWidth = 2 * scale;
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = '#1d4ed8';
+      ctx.fillStyle = '#1d4ed8';
+
+      if (type === 'truck') {
+        ctx.strokeRect(cx - 15 * scale, cy - 8 * scale, 18 * scale, 14 * scale);
+        ctx.strokeRect(cx + 3 * scale, cy - 2 * scale, 10 * scale, 8 * scale);
+        ctx.beginPath();
+        ctx.arc(cx - 7 * scale, cy + 8 * scale, 3.5 * scale, 0, Math.PI * 2);
+        ctx.arc(cx + 8 * scale, cy + 8 * scale, 3.5 * scale, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (type === 'box') {
+        ctx.strokeRect(cx - 10 * scale, cy - 10 * scale, 20 * scale, 20 * scale);
+        ctx.beginPath();
+        ctx.moveTo(cx - 10 * scale, cy); ctx.lineTo(cx + 10 * scale, cy);
+        ctx.moveTo(cx, cy - 10 * scale); ctx.lineTo(cx, cy + 10 * scale);
+        ctx.stroke();
+      } else if (type === 'customs') {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - 12 * scale);
+        ctx.lineTo(cx + 10 * scale, cy - 6 * scale);
+        ctx.lineTo(cx + 8 * scale, cy + 8 * scale);
+        ctx.lineTo(cx, cy + 14 * scale);
+        ctx.lineTo(cx - 8 * scale, cy + 8 * scale);
+        ctx.lineTo(cx - 10 * scale, cy - 6 * scale);
+        ctx.closePath();
+        ctx.stroke();
+      } else if (type === 'ship') {
+        ctx.beginPath();
+        ctx.moveTo(cx - 14 * scale, cy + 4 * scale);
+        ctx.lineTo(cx + 14 * scale, cy + 4 * scale);
+        ctx.lineTo(cx + 10 * scale, cy + 10 * scale);
+        ctx.lineTo(cx - 10 * scale, cy + 10 * scale);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fillRect(cx - 4 * scale, cy - 8 * scale, 8 * scale, 8 * scale);
+      } else if (type === 'road') {
+        ctx.beginPath();
+        ctx.moveTo(cx - 10 * scale, cy + 12 * scale); ctx.lineTo(cx - 4 * scale, cy - 12 * scale);
+        ctx.moveTo(cx + 10 * scale, cy + 12 * scale); ctx.lineTo(cx + 4 * scale, cy - 12 * scale);
+        ctx.moveTo(cx, cy - 4 * scale); ctx.lineTo(cx, cy + 6 * scale);
+        ctx.stroke();
+      } else if (type === 'delivery') {
+        ctx.beginPath();
+        ctx.moveTo(cx - 8 * scale, cy); ctx.lineTo(cx - 2 * scale, cy + 6 * scale); ctx.lineTo(cx + 10 * scale, cy - 6 * scale);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawArrow(x1, y1, x2, y2, color = '#2563eb') {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 3 * scale;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      const arrowLen = 12 * scale;
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - arrowLen * Math.cos(angle - Math.PI / 6), y2 - arrowLen * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(x2 - arrowLen * Math.cos(angle + Math.PI / 6), y2 - arrowLen * Math.sin(angle + Math.PI / 6));
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    const colW = (W - 130 * scale) / 3;
+    const row1Y = 145 * scale;
+    const rowH = 265 * scale;
+    const row2Y = row1Y + rowH + 45 * scale;
+
+    const c1X = 40 * scale;
+    const c2X = c1X + colW + 25 * scale;
+    const c3X = c2X + colW + 25 * scale;
+
+    drawCard(c1X, row1Y, colW, rowH, 1, 'PENJEMPUTAN (PICKUP)', [
+      { text: 'Lokasi Penjemputan:', bold: true },
+      { text: originAddress },
+      { text: 'Kota Asal: ' + origin, bold: true },
+      { text: 'Armada: 1 Unit ' + vehicle },
+      { text: 'Pickup langsung di alamat muat (Door)' }
+    ], { iconType: 'truck' });
+
+    drawArrow(c1X + colW, row1Y + rowH / 2, c2X, row1Y + rowH / 2);
+
+    drawCard(c2X, row1Y, colW, rowH, 2, 'STANDARISASI KEAMANAN', [
+      { text: 'Di Kantor Pos ' + origin, bold: true },
+      { text: '• Pembuatan Packing Bubble Wrap' },
+      { text: '• Wrapping Plastic & Perlindungan Kargo' },
+      { text: '• Validasi Final Packing List' },
+      { text: '• Pemeriksaan kelayakan barang muatan' }
+    ], { iconType: 'box' });
+
+    drawArrow(c2X + colW, row1Y + rowH / 2, c3X, row1Y + rowH / 2);
+
+    drawCard(c3X, row1Y, colW, rowH, 3, 'PROSES KEPABEANAN (PPFTZ01)', [
+      { text: 'Regulasi Free Trade Zone (' + origin + '):', bold: true },
+      { text: 'A. Input Manifest via Sistem Ion Beta' },
+      { text: 'B. Wawancara Pemilik (BC Batu Ampar)' },
+      { text: 'C. Pemeriksaan Fisik (TPS Pos Batam)' },
+      { text: 'D. Penerbitan SPPB & Penyegelan Truk' }
+    ], { iconType: 'customs', accentColor: '#1d4ed8', badgeBg: '#1d4ed8' });
+
+    drawArrow(c3X + colW / 2, row1Y + rowH, c3X + colW / 2, row2Y, '#ea580c');
+
+    drawCard(c1X, row2Y, colW, rowH, 4, 'PENYEBERANGAN RORO', [
+      { text: 'Mobilisasi ke Pelabuhan Punggur:', bold: true },
+      { text: '• Pelepasan segel & stiker oleh Bea Cukai' },
+      { text: '• Masuk kapal penyeberangan RoRo' },
+      { text: 'Tiba di Pelabuhan Tj. Buton (Riau)', bold: true },
+      { text: '• Pemeriksaan kelengkapan manifest darat' }
+    ], { iconType: 'ship' });
+
+    drawCard(c2X, row2Y, colW, rowH, 5, 'MOBILISASI DARAT AKHIR', [
+      { text: 'Perjalanan Darat Lintas Provinsi:', bold: true },
+      { text: '• Rute Buton menuju ' + destination },
+      { text: '• Monitoring perjalanan armada' },
+      { text: '• Estimasi Waktu Tempuh: ' + tripTime, bold: true },
+      { text: '• Pengawalan dokumen delivery note' }
+    ], { iconType: 'road' });
+
+    drawArrow(c1X + colW, row2Y + rowH / 2, c2X, row2Y + rowH / 2);
+
+    drawCard(c3X, row2Y, colW, rowH, 6, 'PENGANTARAN & BONGKAR', [
+      { text: 'Tiba di ' + destination + ' (Door Delivery):', bold: true },
+      { text: 'Alamat Bongkar: ' + destAddress },
+      { text: 'Penerima / PIC: ' + customer, bold: true },
+      { text: '• Proses bongkar muatan & serah terima' },
+      { text: '• Penandatanganan Berita Acara / SPK' }
+    ], { iconType: 'delivery', accentColor: '#059669', badgeBg: '#059669' });
+
+    drawArrow(c2X + colW, row2Y + rowH / 2, c3X, row2Y + rowH / 2);
+
+    const footY = H - 36 * scale;
+    ctx.fillStyle = '#64748b';
+    ctx.font = Math.round(13 * scale) + 'px "Segoe UI", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('CBA PosNew · Standard Operating Procedure (SOP) Pola Operasi SOW', 40 * scale, footY);
+    ctx.textAlign = 'right';
+    ctx.fillText('Dokumen Pendukung CBA & SOW Shadow · PT Pos Indonesia', W - 40 * scale, footY);
+  }
+
+  async function generateDiagramPngBytes(details = {}) {
+    if (typeof document === 'undefined') return null;
+    const canvas = document.createElement('canvas');
+    canvas.width = 1874;
+    canvas.height = 1048;
+    drawOperationDiagram(canvas, details);
+    return new Promise((resolve) => {
+      canvas.toBlob(async (blob) => {
+        if (!blob) return resolve(null);
+        try {
+          const buf = await blob.arrayBuffer();
+          resolve(new Uint8Array(buf));
+        } catch {
+          resolve(null);
+        }
+      }, 'image/png');
+    });
+  }
+
   async function downloadWorkbook(payload) {
     const response = await fetch(TEMPLATE_URL, { cache: 'no-store' });
     if (!response.ok) throw new Error('Template Excel tidak dapat dimuat. Coba muat ulang halaman.');
@@ -596,5 +943,5 @@
     setTimeout(() => URL.revokeObjectURL(url), 1500);
   }
 
-  window.CBAXlsx = { createWorkbook, downloadWorkbook };
+  window.CBAXlsx = { createWorkbook, downloadWorkbook, drawOperationDiagram, generateDiagramPngBytes, slug };
 })();

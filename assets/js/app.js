@@ -14,7 +14,10 @@
     hasCalculated: false,
     vendorChoice: 'emy',
     otherVendor: { name: '', nib: '', npwp: '' },
-    lastConvertedFromReverse: false
+    lastConvertedFromReverse: false,
+    operationDescriptionCustomized: false,
+    customDiagramBytes: null,
+    customDiagramDataUrl: null
   };
   const $ = (id) => document.getElementById(id);
   const moneyIds = ['netVendor', 'netSDM', 'netGudang', 'netOps'];
@@ -489,10 +492,23 @@
   function resetAll() {
     state.mode = 'maju'; state.result = null; state.hasCalculated = false;
     state.lastConvertedFromReverse = false;
+    state.operationDescriptionCustomized = false;
+    state.customDiagramBytes = null;
+    state.customDiagramDataUrl = null;
+    const customInput = $('customDiagramInput');
+    if (customInput) customInput.value = '';
+    const resetDiagBtn = $('resetDiagramBtn');
+    if (resetDiagBtn) resetDiagBtn.hidden = true;
+    const diagStatus = $('diagramStatus');
+    if (diagStatus) diagStatus.innerHTML = '<span class="status-dot"></span>Otomatis sinkron dengan rute & identitas proyek';
+
     document.querySelectorAll('#excelDetails input,#excelDetails textarea').forEach((field) => {
       field.value = field.defaultValue;
       field.removeAttribute('aria-invalid');
     });
+    const opEl = $('operationDescription');
+    if (opEl) opEl.value = getDefaultOperationDescription(collectExcelDetails());
+
     document.querySelector('input[name="area"][value="ftz"]').checked = true;
     document.querySelector('input[name="margin"][value="0.15"]').checked = true;
     document.querySelector('input[name="vendorChoice"][value="emy"]').checked = true;
@@ -505,6 +521,7 @@
     $('mainInputError').hidden = true; $('netVendor').closest('.money-field').classList.remove('invalid');
     setCalcStatus('incomplete', 'Belum lengkap');
     updateModeUI(); updateMarginUI(); updateExcelCompletion(); updateIntegrationUI();
+    updateDiagramPreview();
     $('netVendor').focus();
     showToast('Form telah direset.');
   }
@@ -568,6 +585,78 @@
     }
   }
 
+  function getDefaultOperationDescription(details = {}) {
+    const customer = details.customerName || details.customerPic || 'Bapak Lukmanur';
+    const commodity = (details.commodity || 'barang pindah').toLowerCase();
+    const pattern = details.operationPattern || 'Door-to-Door';
+    const transport = (details.transportMode || 'darat').toLowerCase();
+    const originCity = details.originCity || 'Batam';
+    const originAddress = details.originAddress || `Rumah ${customer} di Sukajadi ${originCity}`;
+    const destCity = details.destinationCity || 'Tangerang';
+    const destAddress = details.destinationAddress || `rumah ${customer} Jl. Merak Raya No 173 RT 02 RW 012 Kel. Cibodasari Kecamatan Cibodas, Perumnas 1, Kota ${destCity}. 15138`;
+
+    return `Operasional pengiriman ${commodity} ${customer} ini dijalankan dengan skema ${pattern} menggunakan moda transportasi ${transport} dan penyeberangan (RoRo) dengan sistem multi-drop. Tahap awal dimulai dengan penjemputan (pickup) seluruh muatan di ${originAddress}. Barang kemudian dimobilisasi menuju Kantor Pos ${originCity} untuk melalui proses standarisasi keamanan, meliputi pembuatan packing bubble wrap dan wrapping plastic, wrapping menyeluruh, serta validasi final terhadap Packing List untuk memastikan kesesuaian data.
+
+Fase krusial selanjutnya adalah penyelesaian administrasi kepabeanan (PPFTZ01) sesuai regulasi Free Trade Zone. Proses dimulai dengan input data manifest melalui sistem Ion Beta, yang dilanjutkan dengan sesi wawancara pemilik barang di Kantor Bea Cukai Batu Ampar. Setelah itu, dilakukan pemeriksaan fisik barang secara mendetail di Tempat Penimbunan Sementara (TPS) Pos ${originCity}. Apabila hasil pemeriksaan fisik dan dokumen dinyatakan sesuai dalam Berita Acara, Bea Cukai akan menerbitkan Surat Persetujuan Pengeluaran Barang (SPPB). Sebagai langkah pengamanan terakhir di ${originCity}, truk akan disegel (seal) dan ditempel stiker pengaman resmi oleh petugas Bea Cukai sebelum meninggalkan area TPS.
+
+Pada tahap mobilisasi, armada bergerak menuju Pelabuhan Punggur. Di lokasi ini, segel dan stiker pengaman akan dilepas oleh petugas Bea Cukai setempat sebagai prosedur standar sebelum truk menyeberang menuju Pelabuhan Tanjung Buton. Perjalanan darat kemudian dilanjutkan menuju ${destCity}. Setibanya di ${destCity}, kiriman dilakukan pengantaran dan bongkar kiriman di ${destAddress}.`;
+  }
+
+  function renderOperationDiagram(details = {}) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1874;
+    canvas.height = 1048;
+    if (window.CBAXlsx && typeof window.CBAXlsx.drawOperationDiagram === 'function') {
+      window.CBAXlsx.drawOperationDiagram(canvas, details);
+    }
+    return canvas;
+  }
+
+  function updateDiagramPreview() {
+    const previewImg = $('diagramPreviewImg');
+    if (!previewImg) return;
+    if (state.customDiagramDataUrl) {
+      previewImg.src = state.customDiagramDataUrl;
+      return;
+    }
+    const canvas = renderOperationDiagram(collectExcelDetails());
+    previewImg.src = canvas.toDataURL('image/png');
+  }
+
+  async function getDiagramPngBytes(details = {}) {
+    if (state.customDiagramBytes) {
+      return state.customDiagramBytes;
+    }
+    const canvas = renderOperationDiagram(details);
+    return new Promise((resolve) => {
+      canvas.toBlob(async (blob) => {
+        if (!blob) return resolve(null);
+        try {
+          const buf = await blob.arrayBuffer();
+          resolve(new Uint8Array(buf));
+        } catch {
+          resolve(null);
+        }
+      }, 'image/png');
+    });
+  }
+
+  function downloadDiagramImage() {
+    const details = collectExcelDetails();
+    let url = state.customDiagramDataUrl;
+    if (!url) {
+      const canvas = renderOperationDiagram(details);
+      url = canvas.toDataURL('image/png');
+    }
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    const namePart = (window.CBAXlsx && window.CBAXlsx.slug)
+      ? window.CBAXlsx.slug(details.customerName || details.projectName || 'proyek')
+      : 'pola-operasi';
+    anchor.download = `Pola-Operasi-${namePart}.png`;
+    anchor.click();
+  }
+
   async function downloadExcel() {
     if (state.workflow !== 'excel') setWorkflow('excel', { scroll: true });
     if (state.mode !== 'maju') {
@@ -585,7 +674,12 @@
     buttons.forEach((button) => { button.disabled = true; });
     $('downloadExcelBtn').querySelector('span').textContent = 'Menyiapkan workbook…';
     try {
-      await window.CBAXlsx.downloadWorkbook({ result: { ...state.result }, details: collectExcelDetails() });
+      const diagramBytes = await getDiagramPngBytes(collectExcelDetails());
+      await window.CBAXlsx.downloadWorkbook({
+        result: { ...state.result },
+        details: collectExcelDetails(),
+        diagramBytes
+      });
       showToast('Workbook Excel CBA berhasil dibuat.');
     } catch (error) {
       console.error(error);
@@ -660,16 +754,102 @@
       if (caretAtEnd) event.target.setSelectionRange(event.target.value.length, event.target.value.length);
       realtime();
     }));
+    const updateDiagramDebounced = debounce(() => {
+      updateDiagramPreview();
+    }, 250);
+
+    const narrativeTriggerIds = [
+      'customerName', 'customerPic', 'commodity', 'operationPattern', 'transportMode',
+      'originCity', 'destinationCity', 'originAddress', 'destinationAddress', 'vehicleType',
+      'estimatedTrip', 'projectName'
+    ];
+
     excelFieldIds.forEach((id) => {
       const field = $(id);
+      if (!field) return;
       const update = () => {
         field.removeAttribute('aria-invalid');
         if (id === 'startDate') $('endDate').min = field.value;
         updateExcelCompletion();
+        if (narrativeTriggerIds.includes(id)) {
+          if (!state.operationDescriptionCustomized) {
+            const opEl = $('operationDescription');
+            if (opEl) opEl.value = getDefaultOperationDescription(collectExcelDetails());
+          }
+          updateDiagramDebounced();
+        }
       };
       field.addEventListener('input', update);
       field.addEventListener('change', update);
     });
+
+    $('operationDescription')?.addEventListener('input', () => {
+      state.operationDescriptionCustomized = true;
+    });
+
+    $('resetNarrativeBtn')?.addEventListener('click', () => {
+      state.operationDescriptionCustomized = false;
+      const opEl = $('operationDescription');
+      if (opEl) opEl.value = getDefaultOperationDescription(collectExcelDetails());
+      showToast('Narasi operasional diperbarui otomatis sesuai data proyek.');
+    });
+
+    $('regenerateDiagramBtn')?.addEventListener('click', () => {
+      state.customDiagramBytes = null;
+      state.customDiagramDataUrl = null;
+      const customInput = $('customDiagramInput');
+      if (customInput) customInput.value = '';
+      const resetBtn = $('resetDiagramBtn');
+      if (resetBtn) resetBtn.hidden = true;
+      const statusEl = $('diagramStatus');
+      if (statusEl) statusEl.innerHTML = '<span class="status-dot"></span>Otomatis sinkron dengan rute & identitas proyek';
+      updateDiagramPreview();
+      showToast('Diagram pola operasi diperbarui.');
+    });
+
+    $('downloadDiagramBtn')?.addEventListener('click', downloadDiagramImage);
+
+    $('customDiagramInput')?.addEventListener('change', (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        showToast('Pilih file gambar valid (PNG / JPG).', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        state.customDiagramDataUrl = dataUrl;
+        const img = $('diagramPreviewImg');
+        if (img) img.src = dataUrl;
+
+        const arrayBufferReader = new FileReader();
+        arrayBufferReader.onload = (abEvent) => {
+          state.customDiagramBytes = new Uint8Array(abEvent.target.result);
+          const resetBtn = $('resetDiagramBtn');
+          if (resetBtn) resetBtn.hidden = false;
+          const statusEl = $('diagramStatus');
+          if (statusEl) statusEl.innerHTML = '<span class="status-dot" style="background:#2563eb"></span>Menggunakan gambar kustom yang diunggah';
+          showToast('Gambar diagram kustom berhasil diunggah.');
+        };
+        arrayBufferReader.readAsArrayBuffer(file);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    $('resetDiagramBtn')?.addEventListener('click', () => {
+      state.customDiagramBytes = null;
+      state.customDiagramDataUrl = null;
+      const customInput = $('customDiagramInput');
+      if (customInput) customInput.value = '';
+      const resetBtn = $('resetDiagramBtn');
+      if (resetBtn) resetBtn.hidden = true;
+      const statusEl = $('diagramStatus');
+      if (statusEl) statusEl.innerHTML = '<span class="status-dot"></span>Otomatis sinkron dengan rute & identitas proyek';
+      updateDiagramPreview();
+      showToast('Diagram direset ke generator otomatis.');
+    });
+
     $('calculateBtn').addEventListener('click', () => calculateAndRender({ showErrors: true, scroll: true }));
     $('resetBtn').addEventListener('click', resetAll);
     $('clearValuesBtn').addEventListener('click', clearValues);
@@ -685,7 +865,16 @@
   }
 
   function init() {
-    bindEvents(); updateVendorChoice({ preserveCurrent: false }); setWorkflow('calculate'); updateMarginUI(); updateExcelCompletion();
+    bindEvents();
+    updateVendorChoice({ preserveCurrent: false });
+    setWorkflow('calculate');
+    updateMarginUI();
+    updateExcelCompletion();
+    const opEl = $('operationDescription');
+    if (opEl && (!opEl.value || opEl.value.trim() === '')) {
+      opEl.value = getDefaultOperationDescription(collectExcelDetails());
+    }
+    updateDiagramPreview();
     window.CBA = { calculatePricing, toNumber, idr, COF_RATE, collectExcelDetails };
   }
 
