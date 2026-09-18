@@ -58,13 +58,34 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 body.excel-workflow-active .result-shell{background:linear-gradient(160deg,#172554,#4c2430)}
 
 @media (max-width:960px){.workflow-picker{grid-template-columns:1fr}.workflow-heading{text-align:center}.workflow-options{max-width:760px;width:100%;margin:auto}}
-@media (max-width:700px){.workflow-picker{width:calc(100% - 20px);padding:.8rem}.workflow-options{grid-template-columns:1fr}.workflow-card{min-height:70px}.step-nav.excel-workflow{grid-template-columns:repeat(5,minmax(50px,1fr))}.excel-fieldset{padding:.8rem}.field.span-two{grid-column:auto}}
+@media (max-width:700px){.workflow-picker{width:calc(100% - 20px);padding:.8rem}.workflow-options{grid-template-columns:1fr}.workflow-card{min-height:70px}.step-nav.excel-workflow{grid-template-columns:repeat(4,minmax(50px,1fr))}.excel-fieldset{padding:.8rem}.field.span-two{grid-column:auto}}
 @media (max-width:430px){.workflow-heading h2{font-size:.9rem}.workflow-card{grid-template-columns:30px 1fr}.workflow-number{width:30px;height:30px}.step-nav.excel-workflow a{font-size:0}.step-nav.excel-workflow a span{font-size:.66rem}}
-@media print{.workflow-picker,.excel-details{display:none!important}}
+@media print{.workflow-picker,.excel-details,.integration-card,.excel-integration-notice{display:none!important}}
 
 /* Simplified flow without saved-scenario identity controls. */
 .step-nav{grid-template-columns:repeat(3,1fr)}
 .step-nav.excel-workflow{grid-template-columns:repeat(4,minmax(0,1fr))}
 .result-actions{grid-template-columns:repeat(3,1fr)}
 .result-actions:has(#exportBtn[hidden]){grid-template-columns:repeat(2,1fr)}
-@media (max-width:700px){.step-nav{grid-template-columns:repeat(3,minmax(65px,1fr))}.step-nav.excel-workflow{grid-template-columns:repeat(4,minmax(50px,1fr))}}
+@media (max-width:700px){.step-nav{grid-template-columns:repeat(3,minmax(65px,1fr))}.step-nav.excel-workflow{grid-template-columns:repeat(4,minmax(50px,1fr))}.result-actions{grid-template-columns:repeat(3,1fr)}.result-actions button{padding:.4rem .2rem;font-size:.62rem}.integration-notice-header{flex-direction:column;align-items:flex-start}}
+
+/* Integration between Cek Perhitungan and Buat Excel CBA */
+.integration-card{margin-top:1.15rem;padding:1rem;border:1px solid rgba(239,65,35,.35);border-radius:15px;background:linear-gradient(135deg,rgba(239,65,35,.16) 0%,rgba(255,255,255,.06) 100%);color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.15)}
+.integration-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.22rem .55rem;border-radius:999px;background:rgba(239,65,35,.25);border:1px solid rgba(239,65,35,.4);color:#ffb2a2;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.integration-badge svg{width:13px;height:13px;stroke-width:2.2}
+.integration-text{margin:.55rem 0 0;color:#d5e0f0;font-size:.73rem;line-height:1.45}
+.integration-btn{width:100%;min-height:44px;margin-top:.75rem;display:flex;align-items:center;justify-content:center;gap:.45rem;border:0;border-radius:11px;background:var(--orange);color:#fff;font-size:.77rem;font-weight:800;cursor:pointer;box-shadow:0 6px 18px rgba(239,65,35,.35);transition:transform .15s ease,background .15s ease}
+.integration-btn:hover{background:var(--orange-dark);transform:translateY(-1px)}
+.integration-btn:active{transform:translateY(0)}
+.integration-btn svg{width:16px;height:16px}
+
+.excel-integration-notice{margin:.2rem 0 1.15rem;padding:.9rem 1rem;display:flex;align-items:flex-start;gap:.75rem;border:1px solid #bfdbfe;border-radius:13px;background:linear-gradient(180deg,#f0f7ff 0%,#e8f2fe 100%);color:#1e3a8a}
+.integration-notice-icon{width:32px;height:32px;flex:0 0 auto;display:grid;place-items:center;border-radius:9px;background:#dbeafe;color:#1d4ed8}
+.integration-notice-icon svg{width:18px;height:18px}
+.integration-notice-body{flex:1;min-width:0}
+.integration-notice-header{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.integration-notice-header strong{font-size:.78rem;color:#172554;font-weight:800}
+.integration-notice-chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.4rem}
+.integration-chip{display:inline-flex;align-items:center;gap:.3rem;padding:.22rem .55rem;border-radius:7px;background:#fff;border:1px solid #c7d8ed;color:#3b5175;font-size:.67rem}
+.integration-chip strong{color:#0f172a}
+.integration-notice-note{display:block;margin-top:.4rem;color:#4b648b;font-size:.65rem;line-height:1.35}

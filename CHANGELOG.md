@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.2.0 — 2026-09-18
+
+- Menghubungkan alur **Cek Perhitungan CBA** langsung ke **Buat Excel CBA** saat pengguna merasa hasil perhitungan sudah cocok.
+- Menambahkan card integrasi interaktif pada panel hasil kalkulasi untuk beralih langsung ke alur dokumen Excel tanpa input ulang.
+- Menambahkan tombol aksi adaptif "Ke Excel CBA" / "Unduh Excel" pada action bar hasil analisis.
+- Mengonversi otomatis output Reverse Budget (batas net vendor) menjadi nilai net vendor maju saat beralih ke Buat Excel CBA sehingga penawaran customer tetap konsisten.
+- Menambahkan banner ringkasan data biaya & asumsi terintegrasi pada formulir dokumen Excel beserta tautan cepat untuk mengubah nilai biaya.
+
 ## 2.1.1 — 2026-09-18
 
 - Menghapus bagian Informasi Analisis / Identitas Skenario.

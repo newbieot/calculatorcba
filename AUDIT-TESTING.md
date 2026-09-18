@@ -88,3 +88,7 @@ Ekspektasi:
 - [x] Vendor Emy mengisi nama, NIB, dan NPWP otomatis sebagai data terkunci.
 - [x] Vendor lain membuka nama, NIB, dan NPWP sebagai data wajib yang dapat diedit.
 - [x] Perpindahan vendor tidak menghapus data vendor lain selama sesi form.
+- [x] Output menu cek perhitungan terintegrasi langsung ke Buat Excel CBA.
+- [x] Reverse budget otomatis dikonversi ke nilai net vendor maju saat beralih ke formulir Excel.
+- [x] Tombol dan card aksi beralih alur membawa seluruh angka tanpa perlu input ulang.
+- [x] Banner data terintegrasi muncul di formulir Excel untuk konfirmasi visual.

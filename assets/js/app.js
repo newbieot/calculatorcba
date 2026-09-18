@@ -13,7 +13,8 @@
     result: null,
     hasCalculated: false,
     vendorChoice: 'emy',
-    otherVendor: { name: '', nib: '', npwp: '' }
+    otherVendor: { name: '', nib: '', npwp: '' },
+    lastConvertedFromReverse: false
   };
   const $ = (id) => document.getElementById(id);
   const moneyIds = ['netVendor', 'netSDM', 'netGudang', 'netOps'];
@@ -178,10 +179,52 @@
     document.title = state.workflow === 'excel' ? 'CBA PosNew – Buat Excel CBA' : (forward ? 'CBA PosNew – Pricing Calculator' : 'CBA PosNew – Reverse Budget');
   }
 
+  function updateIntegrationUI() {
+    const isExcel = state.workflow === 'excel';
+    const r = state.result;
+    const hasValidResult = Boolean(r && r.valid && !r.budgetOver);
+
+    const transferCard = $('transferToExcelCard');
+    if (transferCard) {
+      transferCard.hidden = isExcel || !hasValidResult;
+      if (hasValidResult && !isExcel) {
+        const isReverse = r.mode === 'mundur';
+        $('transferBadgeText').textContent = isReverse ? 'Reverse Budget Memadai' : 'Perhitungan Cocok?';
+        $('transferCardText').textContent = isReverse
+          ? `Batas net vendor ${idr(r.finalValue)} siap diterapkan untuk mengisi penawaran customer di formulir Excel CBA.`
+          : 'Lanjutkan hasil kalkulasi ini ke formulir dokumen untuk membuat workbook Excel CBA siap pakai.';
+        $('transferBtnText').textContent = isReverse ? 'Terapkan ke Buat Excel CBA' : 'Lanjut Buat Excel CBA';
+      }
+    }
+
+    const notice = $('excelIntegrationNotice');
+    if (notice) {
+      notice.hidden = !isExcel || !hasValidResult;
+      if (hasValidResult && isExcel) {
+        $('integratedOffer').textContent = idr(r.finalValue);
+        $('integratedMargin').textContent = percent(r.margin);
+        $('integratedDirect').textContent = idr(r.directCost);
+        const sourceNote = $('integratedSourceNote');
+        if (sourceNote) {
+          sourceNote.textContent = state.lastConvertedFromReverse
+            ? `Diterapkan dari Reverse Budget: Batas net vendor ${idr(r.netVendor)} menghasilkan nilai penawaran ${idr(r.finalValue)}.`
+            : 'Nilai dari perhitungan aktif otomatis menjadi dasar angka pada sheet CBA2 dan Rekap CBA 1.';
+        }
+      }
+    }
+  }
+
   function setWorkflow(workflow, { scroll = false } = {}) {
     const excel = workflow === 'excel';
     state.workflow = excel ? 'excel' : 'calculate';
-    if (excel && state.mode !== 'maju') state.mode = 'maju';
+    if (excel && state.mode !== 'maju') {
+      if (state.result && state.result.valid && !state.result.budgetOver && state.mode === 'mundur') {
+        const calculatedVendorNet = Math.round(state.result.finalValue);
+        $('netVendor').value = formatInputValue(calculatedVendorNet);
+        state.lastConvertedFromReverse = true;
+      }
+      state.mode = 'maju';
+    }
     $('workflowCalculate').classList.toggle('active', !excel);
     $('workflowExcel').classList.toggle('active', excel);
     $('workflowCalculate').setAttribute('aria-selected', String(!excel));
@@ -193,12 +236,16 @@
     document.querySelector('.mode-switch').classList.toggle('single', excel);
     $('tabMundur').hidden = excel;
     $('excelModeNote').hidden = !excel;
-    $('exportBtn').hidden = !excel;
+    $('exportBtn').hidden = false;
+    const exportLabel = $('exportBtnLabel');
+    if (exportLabel) exportLabel.textContent = excel ? 'Unduh Excel' : 'Ke Excel CBA';
+    $('exportBtn').title = excel ? 'Unduh file Excel CBA' : 'Lanjutkan hasil perhitungan ini ke Buat Excel CBA';
     document.body.classList.toggle('excel-workflow-active', excel);
     updateModeUI();
     updateExcelCompletion();
     if (state.hasCalculated) calculateAndRender();
-    if (excel && scroll) $('inputs').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    updateIntegrationUI();
+    if (excel && scroll) $('excelDetails').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function collectExcelDetails() {
@@ -378,6 +425,7 @@
     renderChart(r);
     renderFormula(r);
     renderSensitivity(r);
+    updateIntegrationUI();
   }
 
   function renderChart(r) {
@@ -440,6 +488,7 @@
 
   function resetAll() {
     state.mode = 'maju'; state.result = null; state.hasCalculated = false;
+    state.lastConvertedFromReverse = false;
     document.querySelectorAll('#excelDetails input,#excelDetails textarea').forEach((field) => {
       field.value = field.defaultValue;
       field.removeAttribute('aria-invalid');
@@ -455,7 +504,7 @@
     $('emptyResult').hidden = false; $('resultContent').hidden = true; $('analysis').hidden = true;
     $('mainInputError').hidden = true; $('netVendor').closest('.money-field').classList.remove('invalid');
     setCalcStatus('incomplete', 'Belum lengkap');
-    updateModeUI(); updateMarginUI(); updateExcelCompletion();
+    updateModeUI(); updateMarginUI(); updateExcelCompletion(); updateIntegrationUI();
     $('netVendor').focus();
     showToast('Form telah direset.');
   }
@@ -463,10 +512,60 @@
   function clearValues() {
     moneyIds.forEach((id) => { $(id).value = ''; });
     state.result = null; state.hasCalculated = false;
+    state.lastConvertedFromReverse = false;
     $('emptyResult').hidden = false; $('resultContent').hidden = true; $('analysis').hidden = true;
     setCalcStatus('incomplete', 'Belum lengkap');
     updateExcelCompletion();
+    updateIntegrationUI();
     $('netVendor').focus();
+  }
+
+  function proceedToExcel() {
+    if (!state.result && !calculateAndRender({ showErrors: true })) {
+      showToast('Masukkan nilai biaya terlebih dahulu.', 'error');
+      return;
+    }
+    if (!state.result || !state.result.valid) {
+      showToast('Perhitungan belum valid. Periksa kembali input.', 'error');
+      return;
+    }
+    if (state.result.budgetOver) {
+      showToast('Budget tidak memadai untuk dibuatkan dokumen CBA.', 'error');
+      return;
+    }
+
+    const wasReverse = state.mode === 'mundur';
+    let reverseNetVendor = 0;
+    if (wasReverse) {
+      reverseNetVendor = Math.round(state.result.finalValue);
+      $('netVendor').value = formatInputValue(reverseNetVendor);
+      state.lastConvertedFromReverse = true;
+      state.mode = 'maju';
+      updateModeUI();
+      calculateAndRender();
+    }
+
+    setWorkflow('excel');
+
+    if (wasReverse) {
+      showToast(`Batas net vendor ${idr(reverseNetVendor)} diterapkan ke alur Excel CBA.`);
+    } else {
+      showToast('Hasil perhitungan berhasil diterapkan ke Buat Excel CBA.');
+    }
+
+    setTimeout(() => {
+      $('excelDetails').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const firstInput = document.querySelector('#excelDetails input[data-excel-required]');
+      if (firstInput) firstInput.focus();
+    }, 120);
+  }
+
+  function handleExportBtnClick() {
+    if (state.workflow === 'excel') {
+      downloadExcel();
+    } else {
+      proceedToExcel();
+    }
   }
 
   async function downloadExcel() {
@@ -524,6 +623,7 @@
   }
 
   const realtime = debounce(() => {
+    state.lastConvertedFromReverse = false;
     updateMarginUI();
     if (state.hasCalculated || toNumber($('netVendor').value) > 0) calculateAndRender();
   });
@@ -574,9 +674,14 @@
     $('resetBtn').addEventListener('click', resetAll);
     $('clearValuesBtn').addEventListener('click', clearValues);
     $('copyBtn').addEventListener('click', copySummary);
-    $('exportBtn').addEventListener('click', downloadExcel);
+    $('exportBtn').addEventListener('click', handleExportBtnClick);
     $('downloadExcelBtn').addEventListener('click', downloadExcel);
     $('printBtn').addEventListener('click', () => window.print());
+    $('proceedToExcelBtn')?.addEventListener('click', proceedToExcel);
+    $('editCalculationBtn')?.addEventListener('click', () => {
+      $('inputs').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      $('netVendor').focus();
+    });
   }
 
   function init() {
