@@ -166,9 +166,8 @@
       }
     },
     {
-      "name": "scenario count 2",
-      "ok": true,
-      "actual": "2"
+      "name": "saved scenario feature removed",
+      "ok": true
     },
     {
       "name": "mobile no horizontal overflow",
@@ -202,7 +201,6 @@
     "desktop-form.png",
     "desktop-result.png",
     "desktop-analysis.png",
-    "desktop-comparison.png",
     "desktop-footer.png",
     "mobile-full.png",
     "mobile-form.png",

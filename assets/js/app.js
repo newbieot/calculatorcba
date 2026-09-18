@@ -2,8 +2,6 @@
   'use strict';
 
   const COF_RATE = (30 / 365) * 0.08;
-  const STORAGE_KEY = 'cba-posnew-scenarios-v2';
-  const MAX_SCENARIOS = 20;
   const DEFAULT_VENDOR = Object.freeze({
     name: 'CV EMY RIZKY JAYA',
     nib: '9120401921208',
@@ -14,14 +12,13 @@
     mode: 'maju',
     result: null,
     hasCalculated: false,
-    scenarios: [],
     vendorChoice: 'emy',
     otherVendor: { name: '', nib: '', npwp: '' }
   };
   const $ = (id) => document.getElementById(id);
   const moneyIds = ['netVendor', 'netSDM', 'netGudang', 'netOps'];
   const excelFieldIds = [
-    'projectId', 'customerName', 'commodity', 'serviceType', 'transportMode', 'paymentTerm',
+    'projectId', 'projectName', 'customerName', 'commodity', 'serviceType', 'transportMode', 'paymentTerm',
     'startDate', 'endDate', 'shipmentWeight', 'packageCount', 'originCity', 'destinationCity',
     'originAddress', 'destinationAddress', 'customerPic', 'customerPhone', 'customerEmail',
     'internalPic', 'customerAddress', 'projectLocation', 'operationPattern', 'vehicleType',
@@ -191,29 +188,23 @@
     $('workflowExcel').setAttribute('aria-selected', String(excel));
     $('excelDetails').hidden = !excel;
     $('excelNavLink').hidden = !excel;
-    $('analysisStepNumber').textContent = excel ? '5' : '4';
+    $('analysisStepNumber').textContent = excel ? '4' : '3';
     document.querySelector('.step-nav').classList.toggle('excel-workflow', excel);
     document.querySelector('.mode-switch').classList.toggle('single', excel);
     $('tabMundur').hidden = excel;
     $('excelModeNote').hidden = !excel;
     $('exportBtn').hidden = !excel;
-    $('projectSectionKicker').textContent = excel ? 'Informasi dokumen' : 'Informasi analisis';
-    $('projectSectionTitle').textContent = excel ? 'Judul proyek' : 'Identitas skenario';
     document.body.classList.toggle('excel-workflow-active', excel);
-    $('projectName').setAttribute('aria-required', String(excel));
     updateModeUI();
     updateExcelCompletion();
     if (state.hasCalculated) calculateAndRender();
-    if (excel && scroll) $('project').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (excel && scroll) $('inputs').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function collectExcelDetails() {
     const details = {};
     excelFieldIds.forEach((id) => { details[id] = $(id).value.trim(); });
     details.vendorChoice = selectedValue('vendorChoice');
-    details.projectName = $('projectName').value.trim();
-    details.analystName = $('analystName').value.trim();
-    details.projectNotes = $('projectNotes').value.trim();
     details.shipmentWeight = Number(details.shipmentWeight || 0);
     details.packageCount = Number(details.packageCount || 0);
     return details;
@@ -261,7 +252,7 @@
   }
 
   function requiredExcelFields() {
-    return [$('projectName'), ...document.querySelectorAll('[data-excel-required]')];
+    return [...document.querySelectorAll('[data-excel-required]')];
   }
 
   function isExcelFieldValid(field) {
@@ -344,7 +335,6 @@
     renderResult(result);
     setCalcStatus(result.budgetOver ? 'error' : 'ready', result.budgetOver ? 'Budget tidak cukup' : 'Up to date');
     updateExcelCompletion();
-    $('saveState').textContent = 'Perubahan belum disimpan';
     if (scroll && window.matchMedia('(max-width: 960px)').matches) $('resultsPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
     return true;
   }
@@ -354,9 +344,7 @@
     $('resultContent').hidden = false;
     $('analysis').hidden = false;
     const forward = r.mode === 'maju';
-    const printProject = $('projectName').value.trim() || 'Tanpa nama skenario';
-    const printAnalyst = $('analystName').value.trim();
-    $('printMeta').textContent = `Skenario: ${printProject}${printAnalyst ? `\nDisusun oleh: ${printAnalyst}` : ''}\nTanggal analisis: ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`;
+    $('printMeta').textContent = `Tanggal analisis: ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`;
     const status = $('resultStatus');
     status.className = `result-status ${r.budgetOver ? 'error' : 'ready'}`;
     status.textContent = r.budgetOver ? 'Budget tidak memadai' : (forward ? 'Siap ditawarkan' : 'Anggaran memadai');
@@ -438,9 +426,7 @@
   function summaryText() {
     const r = state.result;
     if (!r) return '';
-    const name = $('projectName').value.trim() || 'Tanpa nama';
     return [
-      `Nama Skenario: ${name}`,
       `Mode: ${r.mode === 'maju' ? 'Hitung Penawaran' : 'Reverse Budget'}`,
       `Wilayah: ${r.area === 'ftz' ? 'Batam (FTZ)' : 'Luar Batam'}`,
       `Vendor PKP: ${r.isPKP ? 'Ya' : 'Tidak'}`,
@@ -452,110 +438,8 @@
     ].join('\n');
   }
 
-  function buildScenario() {
-    const r = state.result;
-    return {
-      id: (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`),
-      version: 2,
-      createdAt: new Date().toISOString(),
-      projectName: $('projectName').value.trim() || `Skenario ${new Date().toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })}`,
-      analystName: $('analystName').value.trim(),
-      notes: $('projectNotes').value.trim(),
-      input: collectInput(false),
-      result: {
-        finalValue: r.finalValue, profit: r.profit, baseCost: r.baseCost, directCost: r.directCost,
-        budgetOver: r.budgetOver, mode: r.mode, margin: r.margin, area: r.area
-      }
-    };
-  }
-
-  function loadScenarios() {
-    try {
-      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      state.scenarios = Array.isArray(parsed) ? parsed.filter((item) => item && item.input && item.result).slice(0, MAX_SCENARIOS) : [];
-    } catch {
-      state.scenarios = [];
-      localStorage.removeItem(STORAGE_KEY);
-      showToast('Data skenario lama rusak dan telah diabaikan.', 'error');
-    }
-    renderScenarios();
-  }
-
-  function persistScenarios() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.scenarios));
-      return true;
-    } catch {
-      showToast('Skenario gagal disimpan. Penyimpanan browser mungkin penuh.', 'error');
-      return false;
-    }
-  }
-
-  function saveScenario() {
-    if (!state.result && !calculateAndRender({ showErrors: true })) return;
-    const item = buildScenario();
-    state.scenarios.unshift(item);
-    state.scenarios = state.scenarios.slice(0, MAX_SCENARIOS);
-    if (persistScenarios()) {
-      $('saveState').textContent = 'Skenario tersimpan';
-      renderScenarios();
-      showToast(`Skenario “${item.projectName}” disimpan di perangkat ini.`);
-    }
-  }
-
-  function renderScenarios() {
-    const count = state.scenarios.length;
-    $('scenarioCount').hidden = count === 0;
-    $('scenarioCount').textContent = count;
-    $('comparisonSection').hidden = count < 2;
-    $('scenarioList').innerHTML = count ? state.scenarios.map((item) => `
-      <div class="scenario-item">
-        <div><strong>${escapeHtml(item.projectName)}</strong><small>${item.result.mode === 'maju' ? 'Penawaran' : 'Reverse'} · ${percent(item.result.margin)} · ${item.result.budgetOver ? 'BUDGET OVER' : idr(item.result.finalValue)}</small></div>
-        <div class="scenario-item-actions"><button type="button" data-load="${item.id}">Muat</button><button type="button" class="danger" data-delete="${item.id}">Hapus</button></div>
-      </div>`).join('') : '<div class="scenario-empty">Belum ada skenario tersimpan.</div>';
-    $('comparisonBody').innerHTML = state.scenarios.slice(0, 8).map((item) => `<tr><td><strong>${escapeHtml(item.projectName)}</strong></td><td>${item.result.mode === 'maju' ? 'Penawaran' : 'Reverse'}</td><td>${percent(item.result.margin)}</td><td>${item.result.budgetOver ? 'BUDGET OVER' : idr(item.result.finalValue)}</td><td>${idr(item.result.profit)}</td><td><button class="scenario-action" type="button" data-load="${item.id}">Muat</button></td></tr>`).join('');
-  }
-
-  function escapeHtml(text) {
-    return String(text).replace(/[&<>'"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[ch]));
-  }
-
-  function loadScenario(id) {
-    const item = state.scenarios.find((scenario) => scenario.id === id);
-    if (!item) return;
-    const input = item.input;
-    if (state.workflow === 'excel' && input.mode === 'mundur') setWorkflow('calculate');
-    state.mode = input.mode;
-    document.querySelector(`input[name="area"][value="${input.area}"]`).checked = true;
-    const preset = [0.10, 0.15].includes(Number(input.margin)) ? String(Number(input.margin).toFixed(2)) : 'custom';
-    document.querySelector(`input[name="margin"][value="${preset}"]`).checked = true;
-    const customMargin = Number(input.margin) * 100;
-    $('customMargin').value = formatMargin(customMargin);
-    $('customMarginSlider').value = customMargin;
-    $('pkp').checked = Boolean(input.isPKP);
-    moneyIds.forEach((idKey) => { $(idKey).value = formatInputValue(input[idKey]); });
-    $('projectName').value = item.projectName || '';
-    $('analystName').value = item.analystName || '';
-    $('projectNotes').value = item.notes || '';
-    updateModeUI();
-    updateMarginUI();
-    calculateAndRender();
-    updateExcelCompletion();
-    $('saveState').textContent = 'Skenario dimuat';
-    if ($('scenarioDialog').open) $('scenarioDialog').close();
-    showToast(`Skenario “${item.projectName}” dimuat.`);
-  }
-
-  function deleteScenario(id) {
-    state.scenarios = state.scenarios.filter((item) => item.id !== id);
-    persistScenarios();
-    renderScenarios();
-    showToast('Skenario dihapus.');
-  }
-
   function resetAll() {
     state.mode = 'maju'; state.result = null; state.hasCalculated = false;
-    $('projectName').value = ''; $('analystName').value = ''; $('projectNotes').value = '';
     document.querySelectorAll('#excelDetails input,#excelDetails textarea').forEach((field) => {
       field.value = field.defaultValue;
       field.removeAttribute('aria-invalid');
@@ -569,11 +453,10 @@
     $('customMargin').value = '12,5'; $('customMarginSlider').value = '12.5'; $('pkp').checked = false;
     moneyIds.forEach((id) => { $(id).value = ''; });
     $('emptyResult').hidden = false; $('resultContent').hidden = true; $('analysis').hidden = true;
-    $('saveState').textContent = 'Belum disimpan';
     $('mainInputError').hidden = true; $('netVendor').closest('.money-field').classList.remove('invalid');
     setCalcStatus('incomplete', 'Belum lengkap');
     updateModeUI(); updateMarginUI(); updateExcelCompletion();
-    $('projectName').focus();
+    $('netVendor').focus();
     showToast('Form telah direset.');
   }
 
@@ -677,11 +560,6 @@
       if (caretAtEnd) event.target.setSelectionRange(event.target.value.length, event.target.value.length);
       realtime();
     }));
-    ['projectName', 'analystName', 'projectNotes'].forEach((id) => $(id).addEventListener('input', () => {
-      $('saveState').textContent = 'Perubahan belum disimpan';
-      $(id).removeAttribute('aria-invalid');
-      updateExcelCompletion();
-    }));
     excelFieldIds.forEach((id) => {
       const field = $(id);
       const update = () => {
@@ -695,28 +573,14 @@
     $('calculateBtn').addEventListener('click', () => calculateAndRender({ showErrors: true, scroll: true }));
     $('resetBtn').addEventListener('click', resetAll);
     $('clearValuesBtn').addEventListener('click', clearValues);
-    $('saveScenarioBtn').addEventListener('click', saveScenario);
     $('copyBtn').addEventListener('click', copySummary);
     $('exportBtn').addEventListener('click', downloadExcel);
     $('downloadExcelBtn').addEventListener('click', downloadExcel);
     $('printBtn').addEventListener('click', () => window.print());
-    $('openScenariosBtn').addEventListener('click', () => $('scenarioDialog').showModal());
-    $('scenarioList').addEventListener('click', (event) => {
-      const load = event.target.closest('[data-load]'); const del = event.target.closest('[data-delete]');
-      if (load) loadScenario(load.dataset.load); if (del) deleteScenario(del.dataset.delete);
-    });
-    $('comparisonBody').addEventListener('click', (event) => { const load = event.target.closest('[data-load]'); if (load) loadScenario(load.dataset.load); });
-    $('clearScenariosBtn').addEventListener('click', () => {
-      state.scenarios = []; persistScenarios(); renderScenarios(); showToast('Semua skenario tersimpan telah dihapus.');
-    });
-    $('scenarioDialog').addEventListener('click', (event) => {
-      const rect = $('scenarioDialog').getBoundingClientRect();
-      if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) $('scenarioDialog').close();
-    });
   }
 
   function init() {
-    bindEvents(); updateVendorChoice({ preserveCurrent: false }); setWorkflow('calculate'); updateMarginUI(); loadScenarios(); updateExcelCompletion();
+    bindEvents(); updateVendorChoice({ preserveCurrent: false }); setWorkflow('calculate'); updateMarginUI(); updateExcelCompletion();
     window.CBA = { calculatePricing, toNumber, idr, COF_RATE, collectExcelDetails };
   }
 

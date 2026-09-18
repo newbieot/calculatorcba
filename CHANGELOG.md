@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.1.1 — 2026-09-18
+
+- Menghapus bagian Informasi Analisis / Identitas Skenario.
+- Menghapus fungsi simpan, muat, hapus, dan perbandingan skenario tersimpan.
+- Memindahkan Nama Proyek yang dibutuhkan workbook ke formulir khusus **Buat Excel CBA**.
+- Menyederhanakan navigasi menjadi tiga langkah untuk cek perhitungan dan empat langkah untuk ekspor Excel.
+
 ## 2.1.0 — 2026-09-18
 
 - Menambahkan pilihan alur **Cek Perhitungan CBA** dan **Buat Excel CBA**.

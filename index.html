@@ -19,7 +19,7 @@
   <link rel="icon" href="favicon-calculatorcba.png" type="image/png">
   <link rel="apple-touch-icon" href="favicon-calculatorcba.png">
   <link rel="manifest" href="site.webmanifest">
-  <link rel="stylesheet" href="assets/css/app.css?v=20260918-2">
+  <link rel="stylesheet" href="assets/css/app.css?v=20260918-3">
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -46,10 +46,6 @@
       </a>
       <div class="header-actions">
         <span class="privacy-pill"><span class="status-dot"></span>Diproses lokal</span>
-        <button class="icon-button" id="openScenariosBtn" type="button" aria-label="Buka skenario tersimpan" title="Skenario tersimpan">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v13A2.5 2.5 0 0 1 17.5 21h-11A2.5 2.5 0 0 1 4 18.5v-13Z"/><path d="M8 3v6h8V3M8 15h8"/></svg>
-          <span id="scenarioCount" class="counter" hidden>0</span>
-        </button>
       </div>
     </div>
   </header>
@@ -92,27 +88,14 @@
     </section>
 
     <nav class="step-nav" aria-label="Navigasi bagian">
-      <a href="#project"><span>1</span>Informasi</a>
-      <a href="#inputs"><span>2</span>Biaya & Asumsi</a>
-      <a href="#resultsPanel"><span>3</span>Hasil</a>
-      <a id="excelNavLink" href="#excelDetails" hidden><span>4</span>Data Excel</a>
-      <a href="#analysis"><span id="analysisStepNumber">4</span>Analisis</a>
+      <a href="#inputs"><span>1</span>Biaya & Asumsi</a>
+      <a href="#resultsPanel"><span>2</span>Hasil</a>
+      <a id="excelNavLink" href="#excelDetails" hidden><span>3</span>Data Excel</a>
+      <a href="#analysis"><span id="analysisStepNumber">3</span>Analisis</a>
     </nav>
 
     <section id="workspace" class="workspace" aria-label="Workspace kalkulator">
       <div class="input-column">
-        <section id="project" class="panel project-panel">
-          <div class="panel-heading">
-            <div><span id="projectSectionKicker" class="section-kicker">Informasi analisis</span><h2 id="projectSectionTitle">Identitas skenario</h2></div>
-            <span id="saveState" class="save-state">Belum disimpan</span>
-          </div>
-          <div class="field-grid two">
-            <label class="field"><span>Nama proyek / skenario</span><input id="projectName" type="text" maxlength="80" placeholder="Contoh: Distribusi dokumen Q3"></label>
-            <label class="field"><span>Disusun oleh <em>opsional</em></span><input id="analystName" type="text" maxlength="60" placeholder="Nama penyusun"></label>
-          </div>
-          <label class="field"><span>Catatan <em>opsional</em></span><textarea id="projectNotes" rows="2" maxlength="300" placeholder="Konteks penawaran, asumsi, atau catatan rapat"></textarea></label>
-        </section>
-
         <section id="inputs" class="panel">
           <div class="panel-heading">
             <div><span class="section-kicker">Langkah utama</span><h2>Biaya dan asumsi</h2></div>
@@ -209,6 +192,7 @@
             <legend>Identitas proyek</legend>
             <div class="field-grid two">
               <label class="field"><span>ID proyek <b>*</b></span><input id="projectId" type="text" maxlength="40" placeholder="Contoh: CB2940026023" data-excel-required></label>
+              <label class="field"><span>Nama proyek <b>*</b></span><input id="projectName" type="text" maxlength="100" placeholder="Contoh: Pengiriman Barang Pindah Tangerang" data-excel-required></label>
               <label class="field"><span>Nama pelanggan <b>*</b></span><input id="customerName" type="text" maxlength="100" placeholder="Nama perusahaan / pelanggan" data-excel-required></label>
               <label class="field"><span>Jenis kiriman / komoditi <b>*</b></span><input id="commodity" type="text" maxlength="100" value="Barang Pindah" data-excel-required></label>
               <label class="field"><span>Jenis layanan <b>*</b></span><input id="serviceType" type="text" maxlength="80" value="FREIGHT FORWARDING" data-excel-required></label>
@@ -294,7 +278,6 @@
             </div>
 
             <div class="result-actions">
-              <button id="saveScenarioBtn" type="button"><svg viewBox="0 0 24 24"><path d="M5 3h12l2 2v16H5V3Z"/><path d="M8 3v6h8V3M8 15h8"/></svg>Simpan</button>
               <button id="copyBtn" type="button"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Salin</button>
               <button id="exportBtn" type="button" hidden><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Buat Excel</button>
               <button id="printBtn" type="button"><svg viewBox="0 0 24 24"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7z"/></svg>Cetak</button>
@@ -337,29 +320,16 @@
 
         <section class="panel sensitivity-panel">
           <div class="panel-heading"><div><span class="section-kicker">Sensitivitas</span><h3>Dampak perubahan margin</h3></div></div>
-          <p class="panel-intro">Perbandingan menggunakan input yang sama tanpa mengubah skenario utama.</p>
+          <p class="panel-intro">Perbandingan menggunakan input yang sama tanpa mengubah perhitungan aktif.</p>
           <div class="table-wrap"><table><thead><tr><th>Margin</th><th id="sensitivityOutputHeading">Penawaran</th><th>Profit</th><th>Status</th></tr></thead><tbody id="sensitivityBody"></tbody></table></div>
         </section>
       </div>
-
-      <section id="comparisonSection" class="panel comparison-panel" hidden>
-        <div class="panel-heading"><div><span class="section-kicker">Skenario tersimpan</span><h3>Perbandingan cepat</h3></div><button id="clearScenariosBtn" class="text-button danger" type="button">Hapus semua</button></div>
-        <div class="table-wrap"><table><thead><tr><th>Nama</th><th>Mode</th><th>Margin</th><th>Hasil utama</th><th>Profit</th><th></th></tr></thead><tbody id="comparisonBody"></tbody></table></div>
-      </section>
 
       <aside class="disclaimer"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><p><strong>Catatan penggunaan.</strong> Hasil kalkulasi merupakan alat bantu pricing berdasarkan data dan asumsi yang dimasukkan pengguna. Hasil tidak menggantikan kajian keuangan, pajak, hukum, atau keputusan manajemen resmi.</p></aside>
     </section>
   </main>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
-
-  <dialog id="scenarioDialog" class="scenario-dialog" aria-labelledby="scenarioDialogTitle">
-    <form method="dialog" class="dialog-shell">
-      <div class="dialog-heading"><div><span class="section-kicker">Data perangkat ini</span><h2 id="scenarioDialogTitle">Skenario tersimpan</h2></div><button class="dialog-close" value="cancel" aria-label="Tutup dialog">×</button></div>
-      <p>Skenario disimpan hanya pada browser ini. Pilih skenario untuk memuat kembali seluruh input.</p>
-      <div id="scenarioList" class="scenario-list"></div>
-    </form>
-  </dialog>
 
   <footer class="dashboard-footer">
     <a class="footer-brand" href="https://posnew.com/">
@@ -375,6 +345,6 @@
 
   <noscript><div class="noscript">JavaScript harus diaktifkan untuk menggunakan kalkulator ini.</div></noscript>
   <script src="assets/js/xlsx-export.js?v=20260918-2" defer></script>
-  <script src="assets/js/app.js?v=20260918-2" defer></script>
+  <script src="assets/js/app.js?v=20260918-3" defer></script>
 </body>
 </html>

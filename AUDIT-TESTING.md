@@ -37,7 +37,6 @@ Tidak ada formula bisnis lama yang diubah. Fungsi perhitungan dipisahkan menjadi
 - Input custom margin kosong sebelumnya menghasilkan nilai batas secara diam-diam; kini ditandai tidak valid.
 - Kondisi budget tidak cukup kini mempunyai status dan penjelasan, bukan hanya teks `BUDGET OVER!`.
 - Dependensi CDN dihapus agar aplikasi tetap cepat dan tidak gagal ketika CDN bermasalah.
-- Data skenario localStorage yang rusak ditangani tanpa membuat halaman crash.
 - Nilai nol/kosong tidak menghasilkan NaN atau Infinity.
 - Footer mobile tidak lagi bertumpuk dan memakan banyak ruang.
 
@@ -75,9 +74,9 @@ Ekspektasi:
 - [x] Nilai nol tidak menampilkan NaN/Infinity.
 - [x] Realtime calculation bekerja.
 - [x] Reset dan kosongkan nilai bekerja.
-- [x] Save/load/delete scenario bekerja.
-- [x] Perbandingan skenario memakai data aktual.
-- [x] Copy Summary dan ekspor JSON bekerja.
+- [x] Bagian identitas dan penyimpanan skenario tidak lagi tampil.
+- [x] Nama proyek hanya diminta di formulir Excel.
+- [x] Copy Summary dan ekspor Excel bekerja.
 - [x] Print stylesheet A4 tersedia.
 - [x] Desktop dan mobile tidak horizontal overflow.
 - [x] Footer mengikuti struktur/style referensi.
